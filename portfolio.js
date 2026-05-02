@@ -341,9 +341,14 @@
     // Drumhead fires once at strum start (it's a single instrument).
     _scheduleDrumhead(_audioCtx, now, body);
 
-    // Each string staggered = strum across them, not piano block chord.
+    // Per-strum stagger varies 10-45ms — a fast frantic flick vs. a lazy
+    // drag across the strings. Plus tiny per-string jitter for human feel.
+    const baseStagger = 0.010 + Math.random() * 0.035;
+    let t = now;
     chord.forEach((f, i) => {
-      _scheduleString(_audioCtx, f, now + i * 0.022, body);
+      _scheduleString(_audioCtx, f, t, body);
+      const jitter = (Math.random() - 0.5) * 0.006;
+      t += baseStagger + jitter;
     });
   }
 
