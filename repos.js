@@ -15,7 +15,7 @@ const PORTFOLIO_DATA = {
       id: "agentic-ai",
       name: "AGENTIC_AI",
       label: "Agentic AI",
-      description: "MCP services and Claude tooling — the scaffolding for agents that build with you, not for you.",
+      description: "A sandboxed environment for Claude Code.  Comes with MCP services to extend sandboxed capabilities.",
       glyph: "◈",
       repos: [
         {
@@ -73,7 +73,7 @@ const PORTFOLIO_DATA = {
       id: "games",
       name: "GAMES",
       label: "Games",
-      description: "From terminal chess engines to retro RPG remakes — the playground where ideas get tested.",
+      description: "All blunt and cutting edge technologies get tested here first.",
       glyph: "▶",
       repos: [
         {
@@ -119,7 +119,7 @@ const PORTFOLIO_DATA = {
       id: "valheim-mods",
       name: "VALHEIM_MODS",
       label: "Valheim Mods",
-      description: "Quality-of-life mods for Valheim — viking life, but with the friction filed off.",
+      description: "A foray into some non-paid software that people actually use (see the Thunderstore stats !)",
       glyph: "ᚱ",
       repos: [
         {
