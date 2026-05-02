@@ -302,7 +302,21 @@
     if (_audioCtx.state === 'suspended') _audioCtx.resume();
 
     const root = BANJO_ROOTS[Math.floor(Math.random() * BANJO_ROOTS.length)];
-    const chord = [root, root * MAJOR_THIRD, root * PERFECT_FIFTH];
+
+    // 1-, 2-, 3-, or 4-string strum chosen at random.
+    // All voicings stay diatonic in G major:
+    //   1 = root only
+    //   2 = root + 5th (open fifth, very banjo)
+    //   3 = full major triad
+    //   4 = triad + octave root
+    const VOICINGS = [
+      [1],
+      [1, PERFECT_FIFTH],
+      [1, MAJOR_THIRD, PERFECT_FIFTH],
+      [1, MAJOR_THIRD, PERFECT_FIFTH, 2],
+    ];
+    const voicing = VOICINGS[Math.floor(Math.random() * VOICINGS.length)];
+    const chord = voicing.map(m => root * m);
 
     // Output chain: bus everything through the cheap-wood color stack.
     // body resonance — the woody "honk" peak around 360Hz (small wood shell)
