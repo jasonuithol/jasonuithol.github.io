@@ -507,14 +507,21 @@
   // ============================================================
   const swapBtn = document.getElementById('mode-swap');
   if (swapBtn) {
+    const rainCtl = _initSwapButtonRain(swapBtn);
     swapBtn.addEventListener('click', () => {
       const current = document.body.dataset.mode || 'red';
       document.body.dataset.mode = current === 'red' ? 'blue' : 'red';
       if (window.matrixRain && document.body.dataset.mode === 'red') {
         window.matrixRain.burst();
       }
+      // Mode just flipped while cursor is still on the button — restart
+      // the hover effect in the new direction so we don't render a frozen
+      // halfway state until the mouse leaves.
+      if (rainCtl && swapBtn.matches(':hover')) {
+        rainCtl.stop();
+        rainCtl.start();
+      }
     });
-    _initSwapButtonRain(swapBtn);
   }
 
   // Mini matrix-rain inside the swap button — blue-mode hover only.
@@ -706,6 +713,7 @@
 
     btn.addEventListener('mouseenter', start);
     btn.addEventListener('mouseleave', stop);
+    return { start, stop };
   }
 
   // ============================================================
