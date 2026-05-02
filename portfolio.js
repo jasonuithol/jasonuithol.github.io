@@ -315,37 +315,53 @@
     });
   }
 
+  // 1-, 2-, 3-, or 4-string strum chosen at random.
+  // All voicings stay diatonic in G major:
+  //   1 = root only
+  //   2 = root + 5th (open fifth, very banjo)
+  //   3 = full major triad
+  //   4 = triad + octave root
+  const VOICINGS = [
+    [1],
+    [1, PERFECT_FIFTH],
+    [1, MAJOR_THIRD, PERFECT_FIFTH],
+    [1, MAJOR_THIRD, PERFECT_FIFTH, 2],
+  ];
+
+  // Schedule one strum (chord) at startTime through the given output bus.
+  function _scheduleStrum(root, voicing, startTime, output) {
+    const chord = voicing.map(m => root * m);
+    _scheduleDrumhead(_audioCtx, startTime, output);
+
+    // Per-strum stagger 10-45ms — frantic flick vs. lazy drag — plus tiny
+    // per-string jitter so consecutive strums never sound mechanical.
+    const baseStagger = 0.010 + Math.random() * 0.035;
+    let t = startTime;
+    chord.forEach(f => {
+      _scheduleString(_audioCtx, f, t, output);
+      const jitter = (Math.random() - 0.5) * 0.006;
+      t += baseStagger + jitter;
+    });
+  }
+
   function playBanjoChord() {
     _initBanjo();
     if (!_audioCtx) return;
     if (_audioCtx.state === 'suspended') _audioCtx.resume();
 
+    // Pick one root + voicing for the whole phrase — same chord, three strums,
+    // so it sounds like a deliberate bluegrass figure rather than three
+    // unrelated plucks.
     const root = BANJO_ROOTS[Math.floor(Math.random() * BANJO_ROOTS.length)];
-
-    // 1-, 2-, 3-, or 4-string strum chosen at random.
-    // All voicings stay diatonic in G major:
-    //   1 = root only
-    //   2 = root + 5th (open fifth, very banjo)
-    //   3 = full major triad
-    //   4 = triad + octave root
-    const VOICINGS = [
-      [1],
-      [1, PERFECT_FIFTH],
-      [1, MAJOR_THIRD, PERFECT_FIFTH],
-      [1, MAJOR_THIRD, PERFECT_FIFTH, 2],
-    ];
     const voicing = VOICINGS[Math.floor(Math.random() * VOICINGS.length)];
-    const chord = voicing.map(m => root * m);
 
     // Output chain: bus everything through the cheap-wood color stack.
-    // body resonance — the woody "honk" peak around 360Hz (small wood shell)
     const body = _audioCtx.createBiquadFilter();
     body.type = 'peaking';
     body.frequency.value = 360;
     body.Q.value = 8;
     body.gain.value = 5;
 
-    // soft saturation = "twack" — generates harmonics not in the source
     const shaper = _audioCtx.createWaveShaper();
     shaper.curve = _getShaperCurve();
     shaper.oversample = '2x';
@@ -357,18 +373,20 @@
 
     const now = _audioCtx.currentTime;
 
-    // Drumhead fires once at strum start (it's a single instrument).
-    _scheduleDrumhead(_audioCtx, now, body);
+    if (voicing.length === 1) {
+      // single notes don't get strummed — just one pluck
+      _scheduleStrum(root, voicing, now, body);
+    } else {
+      // strum — (pause) — strum — strum
+      // longGap: rest between 1st and 2nd strum (~180-250ms)
+      // shortGap: brief tag between 2nd and 3rd (~80-125ms)
+      const longGap  = 0.18 + Math.random() * 0.07;
+      const shortGap = 0.08 + Math.random() * 0.045;
 
-    // Per-strum stagger varies 10-45ms — a fast frantic flick vs. a lazy
-    // drag across the strings. Plus tiny per-string jitter for human feel.
-    const baseStagger = 0.010 + Math.random() * 0.035;
-    let t = now;
-    chord.forEach((f, i) => {
-      _scheduleString(_audioCtx, f, t, body);
-      const jitter = (Math.random() - 0.5) * 0.006;
-      t += baseStagger + jitter;
-    });
+      _scheduleStrum(root, voicing, now,                       body);
+      _scheduleStrum(root, voicing, now + longGap,             body);
+      _scheduleStrum(root, voicing, now + longGap + shortGap,  body);
+    }
   }
 
   // ============================================================
