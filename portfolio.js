@@ -472,7 +472,7 @@
   });
 
   function _kungFuText() {
-    return document.body.dataset.mode === 'blue' ? 'All your base are belong to us.' : 'I know kung fu.';
+    return document.body.dataset.mode === 'blue' ? '10x delivery unlocked.' : 'I know kung fu.';
   }
 
   function triggerKungFu() {
