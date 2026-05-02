@@ -20,13 +20,21 @@
 <div id="intro">
   <div class="intro-terminal" id="intro-terminal"></div>
   <div class="pill-choice" id="pill-choice">
-    <button class="pill pill-red" id="pill-red">
-      RED
-      <span class="pill-label">— show me everything</span>
+    <button class="pill pill-red" id="pill-red" aria-label="red pill">
+      <svg class="pill-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <g transform="rotate(-45 50 50)">
+          <path d="M50 35 L25 35 A15 15 0 0 0 25 65 L50 65 Z" fill="currentColor"/>
+          <path d="M25 35 L75 35 A15 15 0 0 1 75 65 L25 65 A15 15 0 0 1 25 35 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+        </g>
+      </svg>
     </button>
-    <button class="pill pill-blue" id="pill-blue">
-      BLUE
-      <span class="pill-label">— just the repos, please</span>
+    <button class="pill pill-blue" id="pill-blue" aria-label="blue pill">
+      <svg class="pill-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <g transform="rotate(-135 50 50)">
+          <path d="M50 35 L25 35 A15 15 0 0 0 25 65 L50 65 Z" fill="currentColor"/>
+          <path d="M25 35 L75 35 A15 15 0 0 1 75 65 L25 65 A15 15 0 0 1 25 35 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+        </g>
+      </svg>
     </button>
   </div>
   <button class="skip-intro" id="skip-intro">[ ESC :: skip ]</button>
@@ -46,7 +54,6 @@
     </p>
     <div class="site-meta">
       <span><span id="site-tagline">welcome to the attic</span></span>
-      <span><span id="repo-total">0</span> public repositories</span>
       <span><a id="site-github-link" href="#" target="_blank" rel="noopener">github.com</a></span>
     </div>
   </header>

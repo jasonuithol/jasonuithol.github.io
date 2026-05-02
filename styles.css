@@ -131,11 +131,6 @@ body::after {
   height: 140px;
   border-radius: 50%;
   border: 3px solid;
-  font-family: var(--font-terminal);
-  font-size: 1.4rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   cursor: pointer;
   background: transparent;
   transition: all 0.3s ease;
@@ -156,6 +151,11 @@ body::after {
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 0.3; }
   50% { transform: scale(1.15); opacity: 0; }
+}
+.pill-svg {
+  width: 75%;
+  height: 75%;
+  filter: drop-shadow(0 0 6px currentColor);
 }
 .pill-red {
   color: var(--red);
@@ -181,18 +181,6 @@ body::after {
   box-shadow: 0 0 48px var(--blue);
   transform: scale(1.1);
 }
-.pill-label {
-  position: absolute;
-  bottom: -2.5rem;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  opacity: 0.6;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 .skip-intro {
   position: fixed;
   bottom: 1.5rem;
@@ -635,7 +623,7 @@ body::after {
 @media (max-width: 600px) {
   #portfolio { padding: 1.5rem 1rem 4rem; }
   .pill-choice { gap: 1.5rem; }
-  .pill { width: 110px; height: 110px; font-size: 1.1rem; }
+  .pill { width: 110px; height: 110px; }
   .cluster-grid { grid-template-columns: 1fr; }
   .dossier-body { padding: 1.25rem; }
   .dossier-name { font-size: 1.6rem; }

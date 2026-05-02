@@ -12,7 +12,6 @@
     '> resolving identity: jasonuithol@github',
     '> 21 repositories detected across 3 clusters',
     '> the matrix has you...',
-    '> follow the white rabbit.',
     ''
   ];
 
