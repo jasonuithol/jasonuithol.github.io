@@ -89,6 +89,24 @@
     return `<span class="t-red">${escapeHtml(red)}</span><span class="t-blue">${escapeHtml(blue)}</span>`;
   }
 
+  // pastel trim palette for blue-mode cards — a wide spread across the
+  // pastel spectrum so adjacent cards always feel distinct.
+  const PASTEL_TRIMS = [
+    '#c8d8b5', // soft sage
+    '#e8b8b0', // dusty rose
+    '#e8d4a0', // pale honey
+    '#b8d4e0', // soft sky
+    '#d4c0e0', // lavender
+    '#f2c8a8', // peach
+    '#b8e0d2', // mint
+    '#f0e2a8', // butter
+    '#e8a890', // terracotta
+    '#c0d4e8', // powder blue
+    '#d8c8e0', // pale lilac
+    '#d2e0b8', // pistachio
+  ];
+  let _cardIdx = 0;
+
   // clusters + cards
   const clusterRoot = document.getElementById('clusters');
   data.clusters.forEach(cluster => {
@@ -110,6 +128,7 @@
     cluster.repos.forEach(repo => {
       const card = document.createElement('article');
       card.className = 'repo-card';
+      card.style.setProperty('--card-trim', PASTEL_TRIMS[_cardIdx++ % PASTEL_TRIMS.length]);
       card.innerHTML = `
         <div class="repo-card-content">
           <h3 class="repo-name">${escapeHtml(repo.name)}</h3>

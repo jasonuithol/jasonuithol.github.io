@@ -812,10 +812,10 @@ body[data-mode="blue"] .repo-card {
   overflow: hidden;
 }
 body[data-mode="blue"] .repo-card::before {
-  /* swap terminal title bar for a soft watercolor wash at the top */
+  /* solid pastel trim — color picked per-card from a wide spectrum palette */
   height: 6px;
-  background: linear-gradient(90deg, var(--green) 0%, var(--cyan) 60%, var(--amber) 100%);
-  opacity: 0.5;
+  background: var(--card-trim, #c8d8b5);
+  opacity: 0.85;
   border: none;
 }
 body[data-mode="blue"] .repo-card::after {
