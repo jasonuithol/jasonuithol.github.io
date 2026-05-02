@@ -471,8 +471,13 @@
     }
   });
 
+  function _kungFuText() {
+    return document.body.dataset.mode === 'blue' ? 'All your base are belong to us.' : 'I know kung fu.';
+  }
+
   function triggerKungFu() {
     const overlay = document.getElementById('kungfu-overlay');
+    overlay.textContent = _kungFuText();
     overlay.classList.add('show');
     if (window.matrixRain) window.matrixRain.burst();
     setTimeout(() => {
@@ -492,7 +497,7 @@
       overlay.classList.add('show');
       setTimeout(() => {
         overlay.classList.remove('show');
-        overlay.textContent = 'I know kung fu.';
+        overlay.textContent = _kungFuText();
       }, 2500);
     }
   });
