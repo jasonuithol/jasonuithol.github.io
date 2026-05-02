@@ -644,6 +644,8 @@ body::after {
   flex-wrap: wrap;
 }
 .mode-swap {
+  position: relative;
+  overflow: hidden;
   background: transparent;
   border: 1px solid var(--green-faint);
   color: var(--text-dim);
@@ -1029,12 +1031,30 @@ body[data-mode="blue"] .mode-swap {
   font-weight: 500;
   text-transform: lowercase;
   letter-spacing: 0;
-  padding: 0.4rem 0.95rem;
+  padding: 0.4rem 1.4rem;
 }
 body[data-mode="blue"] .mode-swap:hover {
   border-color: var(--green);
   color: var(--green);
   background: rgba(158, 184, 154, 0.1);
+}
+
+/* mini matrix-rain canvas inside the swap button (blue-mode hover only) */
+.mode-swap-rain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: none;
+  z-index: 0;
+}
+body[data-mode="blue"] .mode-swap-rain {
+  display: block;
+}
+.mode-swap > span {
+  position: relative;
+  z-index: 1;
 }
 
 /* -------- kungfu overlay (still works, just pastel) -------- */

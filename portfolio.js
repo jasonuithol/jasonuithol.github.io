@@ -514,6 +514,139 @@
         window.matrixRain.burst();
       }
     });
+    _initSwapButtonRain(swapBtn);
+  }
+
+  // Mini matrix-rain inside the swap button — blue-mode hover only.
+  // Starts in cottagecore palette, transitions to green-on-black over ~1s.
+  function _initSwapButtonRain(btn) {
+    const canvas = btn.querySelector('.mode-swap-rain');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const GLYPHS = (
+      'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ' +
+      '0123456789'
+    ).split('');
+    const SHUFFLE_CHARS = '!<>-_\\/[]{}=+*^?#01'.split('');
+    const blueLabel = btn.querySelector('.t-blue');
+    const ORIG_LABEL = blueLabel ? blueLabel.textContent : '';
+    const FONT = 16;
+    const FADE_MS = 1000;
+    // sage → matrix green
+    const GLYPH_START = [158, 197, 154];
+    const GLYPH_END   = [  0, 255,  65];
+    // cream → near-black
+    const BG_START = [255, 252, 245];
+    const BG_END   = [  0,   5,   8];
+
+    let drops = [];
+    let cols = 0, rows = 0;
+    let raf = 0;
+    let startTime = 0;
+    let active = false;
+
+    function resize() {
+      const r = btn.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.floor(r.width));
+      canvas.height = Math.max(1, Math.floor(r.height));
+      cols = Math.max(1, Math.floor(canvas.width / FONT));
+      rows = Math.max(1, Math.floor(canvas.height / FONT));
+      // Multiple drops per column → dense "wall" of streams.
+      drops = [];
+      const PER_COL = 4;
+      for (let i = 0; i < cols; i++) {
+        for (let k = 0; k < PER_COL; k++) {
+          drops.push({
+            col: i,
+            y: Math.random() * -rows * 3,
+            ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+          });
+        }
+      }
+    }
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function lc(c1, c2, t) {
+      return [
+        Math.round(lerp(c1[0], c2[0], t)),
+        Math.round(lerp(c1[1], c2[1], t)),
+        Math.round(lerp(c1[2], c2[2], t))
+      ];
+    }
+
+    function tick(now) {
+      if (!active) return;
+      const t = Math.min(1, (now - startTime) / FADE_MS);
+      const bg = lc(BG_START, BG_END, t);
+      // Trail alpha grows with t — early frames mostly transparent so
+      // the button's CSS background shows through cleanly.
+      const trailAlpha = lerp(0.12, 0.20, t);
+      ctx.fillStyle = `rgba(${bg[0]},${bg[1]},${bg[2]},${trailAlpha})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const g = lc(GLYPH_START, GLYPH_END, t);
+      ctx.font = `${FONT}px "Share Tech Mono", monospace`;
+      ctx.fillStyle = `rgb(${g[0]},${g[1]},${g[2]})`;
+      for (let i = 0; i < drops.length; i++) {
+        const d = drops[i];
+        // Stable per-drop glyph; occasionally re-roll for that flicker.
+        if (Math.random() < 0.01) {
+          d.ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        }
+        ctx.fillText(d.ch, d.col * FONT, d.y * FONT);
+        if (d.y * FONT > canvas.height && Math.random() > 0.95) {
+          d.y = -Math.random() * rows;
+          d.ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        }
+        d.y += 0.04;
+      }
+
+      // Glitch the label text — corruption ramps up with t.
+      if (blueLabel) {
+        let out = '';
+        for (let j = 0; j < ORIG_LABEL.length; j++) {
+          const c = ORIG_LABEL[j];
+          if (c === ' ') { out += ' '; continue; }
+          // Probability of being shuffled grows with t; capped so a few
+          // chars still flicker through even at full glitch.
+          if (Math.random() < t * 0.85) {
+            out += SHUFFLE_CHARS[Math.floor(Math.random() * SHUFFLE_CHARS.length)];
+          } else {
+            out += c;
+          }
+        }
+        blueLabel.textContent = out;
+      }
+      raf = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (document.body.dataset.mode !== 'blue') return;
+      if (active) return;
+      // Lock the button's current dimensions so glitched-text reflow can't
+      // shake the whole footer row.
+      const r = btn.getBoundingClientRect();
+      btn.style.width = r.width + 'px';
+      btn.style.height = r.height + 'px';
+      resize();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      active = true;
+      startTime = performance.now();
+      raf = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      active = false;
+      cancelAnimationFrame(raf);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (blueLabel) blueLabel.textContent = ORIG_LABEL;
+      btn.style.width = '';
+      btn.style.height = '';
+    }
+
+    btn.addEventListener('mouseenter', start);
+    btn.addEventListener('mouseleave', stop);
   }
 
   // ============================================================
