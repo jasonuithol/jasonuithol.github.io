@@ -651,15 +651,16 @@ body::after {
   color: var(--text-dim);
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  padding: 0.35rem 0.8rem;
+  padding: 0.35rem 1.2rem;
   cursor: pointer;
   letter-spacing: 0.05em;
-  transition: all 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 1s;
 }
 .mode-swap:hover {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: #7a3a28;
+  color: #7a3a28;
   background: rgba(0, 255, 65, 0.05);
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 /* ============================================================
@@ -1046,11 +1047,7 @@ body[data-mode="blue"] .mode-swap:hover {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  display: none;
   z-index: 0;
-}
-body[data-mode="blue"] .mode-swap-rain {
-  display: block;
 }
 .mode-swap > span {
   position: relative;

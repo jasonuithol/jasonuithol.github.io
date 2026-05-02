@@ -529,38 +529,66 @@
       '0123456789'
     ).split('');
     const SHUFFLE_CHARS = '!<>-_\\/[]{}=+*^?#01'.split('');
-    const blueLabel = btn.querySelector('.t-blue');
-    const ORIG_LABEL = blueLabel ? blueLabel.textContent : '';
+    const FLOWER_SHUFFLE = ['✿', '❀', '❁'];
     const FONT = 16;
     const FADE_MS = 1000;
-    // sage → matrix green
-    const GLYPH_START = [158, 197, 154];
-    const GLYPH_END   = [  0, 255,  65];
-    // cream → near-black
-    const BG_START = [255, 252, 245];
-    const BG_END   = [  0,   5,   8];
+    const SAGE        = [158, 197, 154];
+    const MATRIX_GRN  = [  0, 255,  65];
+    const CREAM       = [255, 252, 245];
+    const NEAR_BLACK  = [  0,   5,   8];
+    // Pastel palette for cottagecore-mode flower particles.
+    const FLOWER_COLORS = [
+      [158, 197, 154], // sage
+      [232, 154, 160], // dusty rose
+      [232, 200, 120], // honey
+      [142, 192, 216], // sky
+      [192, 160, 216]  // lavender
+    ];
 
     let drops = [];
+    let flowers = [];
     let cols = 0, rows = 0;
     let raf = 0;
     let startTime = 0;
     let active = false;
+    // Per-hover direction state (set in start()):
+    let glyphFrom, glyphTo, bgFrom, bgTo, activeLabel, origLabel;
+    let isToMatrix = true;
 
     function resize() {
       const r = btn.getBoundingClientRect();
       canvas.width = Math.max(1, Math.floor(r.width));
       canvas.height = Math.max(1, Math.floor(r.height));
-      cols = Math.max(1, Math.floor(canvas.width / FONT));
-      rows = Math.max(1, Math.floor(canvas.height / FONT));
-      // Multiple drops per column → dense "wall" of streams.
-      drops = [];
-      const PER_COL = 4;
-      for (let i = 0; i < cols; i++) {
-        for (let k = 0; k < PER_COL; k++) {
-          drops.push({
-            col: i,
-            y: Math.random() * -rows * 3,
-            ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+      if (isToMatrix) {
+        cols = Math.max(1, Math.floor(canvas.width / FONT));
+        rows = Math.max(1, Math.floor(canvas.height / FONT));
+        // Multiple drops per column → dense "wall" of streams.
+        drops = [];
+        const PER_COL = 4;
+        for (let i = 0; i < cols; i++) {
+          for (let k = 0; k < PER_COL; k++) {
+            drops.push({
+              col: i,
+              y: Math.random() * -rows * 3,
+              ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+            });
+          }
+        }
+      } else {
+        // Cottagecore: a handful of flowers tumbling around.
+        flowers = [];
+        const N = 7;
+        for (let i = 0; i < N; i++) {
+          flowers.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.55,
+            vy: (Math.random() - 0.5) * 0.40,
+            rot: Math.random() * Math.PI * 2,
+            vrot: (Math.random() - 0.5) * 0.06,
+            color: FLOWER_COLORS[i % FLOWER_COLORS.length],
+            size: 12 + Math.random() * 8,
+            glyph: FLOWER_SHUFFLE[Math.floor(Math.random() * FLOWER_SHUFFLE.length)]
           });
         }
       }
@@ -578,52 +606,83 @@
     function tick(now) {
       if (!active) return;
       const t = Math.min(1, (now - startTime) / FADE_MS);
-      const bg = lc(BG_START, BG_END, t);
+      const bg = lc(bgFrom, bgTo, t);
       // Trail alpha grows with t — early frames mostly transparent so
       // the button's CSS background shows through cleanly.
       const trailAlpha = lerp(0.12, 0.20, t);
       ctx.fillStyle = `rgba(${bg[0]},${bg[1]},${bg[2]},${trailAlpha})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const g = lc(GLYPH_START, GLYPH_END, t);
-      ctx.font = `${FONT}px "Share Tech Mono", monospace`;
-      ctx.fillStyle = `rgb(${g[0]},${g[1]},${g[2]})`;
-      for (let i = 0; i < drops.length; i++) {
-        const d = drops[i];
-        // Stable per-drop glyph; occasionally re-roll for that flicker.
-        if (Math.random() < 0.01) {
-          d.ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+      if (isToMatrix) {
+        const g = lc(glyphFrom, glyphTo, t);
+        ctx.font = `${FONT}px "Share Tech Mono", monospace`;
+        ctx.fillStyle = `rgb(${g[0]},${g[1]},${g[2]})`;
+        for (let i = 0; i < drops.length; i++) {
+          const d = drops[i];
+          if (Math.random() < 0.01) {
+            d.ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+          }
+          ctx.fillText(d.ch, d.col * FONT, d.y * FONT);
+          if (d.y * FONT > canvas.height && Math.random() > 0.95) {
+            d.y = -Math.random() * rows;
+            d.ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+          }
+          d.y += 0.04;
         }
-        ctx.fillText(d.ch, d.col * FONT, d.y * FONT);
-        if (d.y * FONT > canvas.height && Math.random() > 0.95) {
-          d.y = -Math.random() * rows;
-          d.ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+      } else {
+        // Cottagecore: tumbling flowers. Color alpha ramps with t so
+        // they fade in over the transition.
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const f of flowers) {
+          f.x += f.vx;
+          f.y += f.vy;
+          f.rot += f.vrot;
+          if (f.x < -20) f.x = canvas.width + 20;
+          if (f.x > canvas.width + 20) f.x = -20;
+          if (f.y < -20) f.y = canvas.height + 20;
+          if (f.y > canvas.height + 20) f.y = -20;
+          ctx.save();
+          ctx.translate(f.x, f.y);
+          ctx.rotate(f.rot);
+          ctx.font = `${f.size}px "Plus Jakarta Sans", serif`;
+          const a = 0.35 + 0.55 * t;
+          ctx.fillStyle = `rgba(${f.color[0]},${f.color[1]},${f.color[2]},${a})`;
+          ctx.fillText(f.glyph, 0, 0);
+          ctx.restore();
         }
-        d.y += 0.04;
+        // Reset alignment defaults for any other draws.
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'alphabetic';
       }
 
-      // Glitch the label text — corruption ramps up with t.
-      if (blueLabel) {
+      // Glitch the label text — matrix direction only. The garden is mindful.
+      if (isToMatrix && activeLabel) {
         let out = '';
-        for (let j = 0; j < ORIG_LABEL.length; j++) {
-          const c = ORIG_LABEL[j];
+        for (let j = 0; j < origLabel.length; j++) {
+          const c = origLabel[j];
           if (c === ' ') { out += ' '; continue; }
-          // Probability of being shuffled grows with t; capped so a few
-          // chars still flicker through even at full glitch.
           if (Math.random() < t * 0.85) {
             out += SHUFFLE_CHARS[Math.floor(Math.random() * SHUFFLE_CHARS.length)];
           } else {
             out += c;
           }
         }
-        blueLabel.textContent = out;
+        activeLabel.textContent = out;
       }
       raf = requestAnimationFrame(tick);
     }
 
     function start() {
-      if (document.body.dataset.mode !== 'blue') return;
       if (active) return;
+      const mode = document.body.dataset.mode || 'red';
+      isToMatrix = (mode === 'blue');
+      glyphFrom = isToMatrix ? SAGE       : MATRIX_GRN;
+      glyphTo   = isToMatrix ? MATRIX_GRN : SAGE;
+      bgFrom    = isToMatrix ? CREAM      : NEAR_BLACK;
+      bgTo      = isToMatrix ? NEAR_BLACK : CREAM;
+      activeLabel = btn.querySelector(isToMatrix ? '.t-blue' : '.t-red');
+      origLabel = activeLabel ? activeLabel.textContent : '';
       // Lock the button's current dimensions so glitched-text reflow can't
       // shake the whole footer row.
       const r = btn.getBoundingClientRect();
@@ -640,7 +699,7 @@
       active = false;
       cancelAnimationFrame(raf);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (blueLabel) blueLabel.textContent = ORIG_LABEL;
+      if (activeLabel) activeLabel.textContent = origLabel;
       btn.style.width = '';
       btn.style.height = '';
     }
