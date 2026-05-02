@@ -80,9 +80,14 @@
   const data = window.PORTFOLIO_DATA || PORTFOLIO_DATA;
 
   // header
-  document.getElementById('site-handle').textContent = data.identity.handle;
+  document.querySelectorAll('.site-handle').forEach(el => el.textContent = data.identity.handle);
   document.getElementById('site-tagline').textContent = data.identity.tagline;
   document.getElementById('site-github-link').href = data.identity.githubUrl;
+
+  // helper: emit a span pair that swaps based on body[data-mode]
+  function modeText(red, blue) {
+    return `<span class="t-red">${escapeHtml(red)}</span><span class="t-blue">${escapeHtml(blue)}</span>`;
+  }
 
   // clusters + cards
   const clusterRoot = document.getElementById('clusters');
@@ -95,7 +100,7 @@
       <div class="cluster-header">
         <span class="cluster-glyph">${cluster.glyph}</span>
         <h2 class="cluster-name">${cluster.name}</h2>
-        <span class="cluster-count">${cluster.repos.length} repos</span>
+        <span class="cluster-count">${modeText(cluster.repos.length + ' repos', cluster.repos.length + ' little projects')}</span>
         <p class="cluster-description">${cluster.description}</p>
       </div>
       <div class="cluster-grid"></div>
@@ -111,17 +116,21 @@
           <p class="repo-desc">${escapeHtml(repo.description)}</p>
           <div class="repo-meta">
             <span class="repo-lang">${escapeHtml(repo.language || 'misc')}</span>
-            <span class="repo-action">[OPEN_DOSSIER]</span>
+            <span class="repo-action">${modeText('[OPEN_DOSSIER]', 'peek inside →')}</span>
           </div>
         </div>
       `;
 
-      // glitch on hover
+      // hover effect: matrix glitch in red, banjo pluck in blue
       const nameEl = card.querySelector('.repo-name');
       let glitchTimer;
       card.addEventListener('mouseenter', () => {
         clearTimeout(glitchTimer);
-        if (window.glitchText) window.glitchText(nameEl, repo.name, 350);
+        if (document.body.dataset.mode === 'blue') {
+          playBanjoNote();
+        } else if (window.glitchText) {
+          window.glitchText(nameEl, repo.name, 350);
+        }
       });
 
       card.addEventListener('click', () => openDossier(repo));
@@ -140,23 +149,23 @@
 
   function openDossier(repo) {
     const githubUrl = `https://github.com/${data.identity.handle}/${repo.name}`;
-    dossierTitle.textContent = `${repo.name} — DOSSIER.dat`;
+    dossierTitle.querySelector('.dossier-title-name').textContent = `${repo.name} — `;
 
     dossierBody.innerHTML = `
       <h2 class="dossier-name">${escapeHtml(repo.name)}</h2>
       <div class="dossier-tags">
         <span class="dossier-tag lang">${escapeHtml(repo.language || 'misc')}</span>
-        <span class="dossier-tag">PUBLIC</span>
+        <span class="dossier-tag">${modeText('PUBLIC', 'freely shared')}</span>
       </div>
 
       <div class="dossier-section">
-        <h3>SUMMARY</h3>
+        <h3>${modeText('SUMMARY', 'the gist')}</h3>
         <p class="dossier-desc">${escapeHtml(repo.longDesc || repo.description)}</p>
       </div>
 
       <div class="dossier-actions">
         <a class="dossier-link" href="${githubUrl}" target="_blank" rel="noopener">
-          → VIEW_ON_GITHUB
+          ${modeText('→ VIEW_ON_GITHUB', 'find it on github →')}
         </a>
       </div>
     `;
@@ -172,6 +181,55 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && dossier.classList.contains('open')) closeDossier();
   });
+
+  // ============================================================
+  // BANJO PLUCK (Karplus-Strong) — blue-mode hover sound
+  // ============================================================
+  // G major pentatonic across two octaves; pick at random per pluck.
+  const BANJO_FREQS = [196.00, 220.00, 246.94, 293.66, 329.63, 392.00, 440.00, 493.88, 587.33, 659.25];
+  let _audioCtx = null;
+  let _banjoBuffers = null;
+
+  function _initBanjo() {
+    if (_audioCtx) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    _audioCtx = new Ctx();
+    _banjoBuffers = BANJO_FREQS.map(f => _makeBanjoBuffer(_audioCtx, f, 1.0));
+  }
+
+  function _makeBanjoBuffer(ctx, freq, durSec) {
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * durSec);
+    const delay = Math.max(2, Math.floor(sr / freq));
+    const ks = new Float32Array(delay);
+    for (let i = 0; i < delay; i++) ks[i] = Math.random() * 2 - 1;
+    const buf = ctx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+    let idx = 0;
+    // damping < 0.5 -> energy loss per round; 0.496 = bright twangy banjo decay
+    for (let i = 0; i < len; i++) {
+      const s = ks[idx];
+      data[i] = s;
+      const next = (idx + 1) % delay;
+      ks[idx] = (s + ks[next]) * 0.496;
+      idx = next;
+    }
+    return buf;
+  }
+
+  function playBanjoNote() {
+    _initBanjo();
+    if (!_audioCtx || !_banjoBuffers) return;
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    const buf = _banjoBuffers[Math.floor(Math.random() * _banjoBuffers.length)];
+    const src = _audioCtx.createBufferSource();
+    src.buffer = buf;
+    const gain = _audioCtx.createGain();
+    gain.gain.value = 0.28;
+    src.connect(gain).connect(_audioCtx.destination);
+    src.start();
+  }
 
   // ============================================================
   // EASTER EGGS

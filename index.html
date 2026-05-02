@@ -50,10 +50,14 @@
       easyCoder<span class="underscore-cursor">_</span>
     </h1>
     <p class="site-subtitle">
-      <span class="prompt">$</span> whoami → <span id="site-handle">jasonuithol</span>
+      <span class="t-red"><span class="prompt">$</span> whoami → <span class="site-handle">jasonuithol</span></span>
+      <span class="t-blue">gathered &amp; tended by <span class="site-handle">jasonuithol</span></span>
     </p>
     <div class="site-meta">
-      <span><span id="site-tagline">welcome to the attic</span></span>
+      <span>
+        <span class="t-red" id="site-tagline">welcome to the attic</span>
+        <span class="t-blue">pull up a chair, you found my little garden</span>
+      </span>
       <span><a id="site-github-link" href="#" target="_blank" rel="noopener">github.com</a></span>
     </div>
   </header>
@@ -61,8 +65,18 @@
   <div id="clusters"></div>
 
   <footer class="site-footer">
-    <span>© <span id="year"></span> jasonuithol — every line written under the green glow.</span>
-    <span class="hint">try: ↑↑↓↓←→←→ba · type "whoami"</span>
+    <span>
+      <span class="t-red">© <span id="year"></span> jasonuithol — every line written under the green glow.</span>
+      <span class="t-blue">© <span id="year-blue"></span> jasonuithol — every line lovingly handwritten.</span>
+    </span>
+    <span class="footer-right">
+      <span class="hint t-red">try: ↑↑↓↓←→←→ba · type "whoami"</span>
+      <span class="hint t-blue">psst — try ↑↑↓↓←→←→ba, or whisper "whoami"</span>
+      <button id="mode-swap" class="mode-swap">
+        <span class="t-red">[ swap pill ]</span>
+        <span class="t-blue">← back to the matrix</span>
+      </button>
+    </span>
   </footer>
 
 </main>
@@ -73,7 +87,7 @@
 <div id="dossier" role="dialog" aria-modal="true" aria-labelledby="dossier-title">
   <div class="dossier-panel">
     <div class="dossier-titlebar">
-      <span class="dossier-titlebar-left" id="dossier-title">DOSSIER.dat</span>
+      <span class="dossier-titlebar-left" id="dossier-title"><span class="dossier-title-name"></span><span class="t-red">DOSSIER.dat</span><span class="t-blue">field notes</span></span>
       <button class="dossier-close" id="dossier-close" aria-label="close">×</button>
     </div>
     <div class="dossier-body" id="dossier-body"></div>
@@ -84,7 +98,11 @@
 <div id="kungfu-overlay">I know kung fu.</div>
 
 <!-- scripts -->
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script>
+  const _y = new Date().getFullYear();
+  document.getElementById('year').textContent = _y;
+  document.getElementById('year-blue').textContent = _y;
+</script>
 <script src="repos.js"></script>
 <script src="matrix.js"></script>
 <script src="portfolio.js"></script>

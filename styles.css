@@ -28,6 +28,11 @@
 
 /* -------- reset -------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* -------- mode-toggled text (.t-red / .t-blue) -------- */
+.t-blue { display: none; }
+body[data-mode="blue"] .t-red { display: none; }
+body[data-mode="blue"] .t-blue { display: inline; }
 html, body { height: 100%; overflow-x: hidden; }
 body {
   background: var(--bg);
