@@ -724,6 +724,24 @@ body[data-mode="blue"] .site-title {
   letter-spacing: -0.02em;
   text-transform: lowercase;
 }
+body[data-mode="blue"] .title-flowers {
+  display: inline-block;
+  margin-left: 0.4em;
+  font-size: 2em;
+  letter-spacing: -0.18em;
+  vertical-align: -0.15em;
+  padding-right: 0.18em;
+}
+body[data-mode="blue"] .title-flowers > span {
+  display: inline-block;
+  opacity: 0.7;
+  mix-blend-mode: multiply;
+}
+body[data-mode="blue"] .title-flowers > span:nth-child(1) { transform: rotate(-14deg); }
+body[data-mode="blue"] .title-flowers > span:nth-child(2) { transform: rotate(  9deg); }
+body[data-mode="blue"] .title-flowers > span:nth-child(3) { transform: rotate( -5deg); }
+body[data-mode="blue"] .title-flowers > span:nth-child(4) { transform: rotate( 17deg); }
+body[data-mode="blue"] .title-flowers > span:nth-child(5) { transform: rotate( -8deg); }
 body[data-mode="blue"] .site-title .underscore-cursor {
   color: var(--green);
   animation: none;
