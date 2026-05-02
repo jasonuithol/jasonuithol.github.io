@@ -152,9 +152,7 @@
         }
       });
       card.addEventListener('mouseleave', () => {
-        if (document.body.dataset.mode === 'blue') {
-          _bluePluckCancel(card);
-        }
+        clearTimeout(glitchTimer);
       });
 
       card.addEventListener('click', () => openDossier(repo));
@@ -246,9 +244,7 @@
 
   let _audioCtx = null;
   let _shaperCurve = null;
-  let _busyUntil = 0; // audioCtx.currentTime past which a new strum is allowed
-  let _pendingCard = null;
-  let _pendingTimer = null;
+  let _currentGain = null; // master gain of the currently-ringing chord, if any
 
   function _initBanjo() {
     if (_audioCtx) return;
@@ -358,18 +354,24 @@
     });
   }
 
-  // Returns true if a strum was actually scheduled, false if blocked.
   function playBanjoChord() {
     _initBanjo();
-    if (!_audioCtx) return false;
+    if (!_audioCtx) return;
     if (_audioCtx.state === 'suspended') _audioCtx.resume();
 
-    // Block new strums while one is still ringing — no overlapping cacophony.
-    if (_audioCtx.currentTime < _busyUntil) return false;
+    // Cut off any chord still ringing — fast gain ramp + disconnect.
+    if (_currentGain) {
+      const t = _audioCtx.currentTime;
+      try {
+        _currentGain.gain.cancelScheduledValues(t);
+        _currentGain.gain.setValueAtTime(_currentGain.gain.value, t);
+        _currentGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
+        const old = _currentGain;
+        setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 60);
+      } catch (e) { /* node already in a bad state — ignore */ }
+      _currentGain = null;
+    }
 
-    // Pick one root + voicing for the whole phrase — same chord, three strums,
-    // so it sounds like a deliberate bluegrass figure rather than three
-    // unrelated plucks.
     const root = BANJO_ROOTS[Math.floor(Math.random() * BANJO_ROOTS.length)];
     const voicing = VOICINGS[Math.floor(Math.random() * VOICINGS.length)];
 
@@ -392,62 +394,25 @@
 
     const now = _audioCtx.currentTime;
 
-    // worst-case ring-out per string ~0.6s (capped in _scheduleSine), plus
-    // the gap between notes (matches the choices in _scheduleStrum).
-    const maxGap =
-      voicing.length === 2 ? 0.17 :
-      voicing.length === 4 ? 0.007 :
-                             0.045;
-    const ringTail = 0.6 + (voicing.length - 1) * maxGap;
-    let lastStrumStart;
-
     if (voicing.length === 3) {
       // strum — (pause) — strum — strum (bluegrass repeat figure)
-      // longGap: rest between 1st and 2nd strum (~180-250ms)
-      // shortGap: brief tag between 2nd and 3rd (~80-125ms)
       const longGap  = 0.18 + Math.random() * 0.07;
       const shortGap = 0.08 + Math.random() * 0.045;
-
       _scheduleStrum(root, voicing, now,                       body);
       _scheduleStrum(root, voicing, now + longGap,             body);
       _scheduleStrum(root, voicing, now + longGap + shortGap,  body);
-      lastStrumStart = now + longGap + shortGap;
     } else {
-      // 1 note = single pluck. 2 notes = two distinct plucks. 4 notes = one
-      // hard fast strum across all strings. None get the bluegrass repeat.
+      // 1 = single pluck; 2 = two distinct plucks; 4 = one hard fast strum.
       _scheduleStrum(root, voicing, now, body);
-      lastStrumStart = now;
     }
 
-    _busyUntil = lastStrumStart + ringTail;
-    return true;
+    _currentGain = gain;
   }
 
-  // Hover trigger: try to strum now. If blocked because another strum is
-  // ringing, queue a single retry — but only fire it if the cursor is still
-  // inside this same card when the busy period ends.
-  function _bluePluckTrigger(card) {
-    if (playBanjoChord()) {
-      _pendingCard = null;
-      clearTimeout(_pendingTimer);
-      return;
-    }
-    _pendingCard = card;
-    clearTimeout(_pendingTimer);
-    const waitMs = Math.max(0, (_busyUntil - _audioCtx.currentTime) * 1000) + 15;
-    _pendingTimer = setTimeout(() => {
-      if (_pendingCard === card) {
-        playBanjoChord();
-        _pendingCard = null;
-      }
-    }, waitMs);
-  }
-
-  function _bluePluckCancel(card) {
-    if (_pendingCard === card) {
-      clearTimeout(_pendingTimer);
-      _pendingCard = null;
-    }
+  // Hover trigger: just play. The chord-cutoff inside playBanjoChord handles
+  // any in-flight ringing.
+  function _bluePluckTrigger() {
+    playBanjoChord();
   }
 
   // ============================================================
