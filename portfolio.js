@@ -241,6 +241,7 @@
 
   let _audioCtx = null;
   let _shaperCurve = null;
+  let _busyUntil = 0; // audioCtx.currentTime past which a new strum is allowed
 
   function _initBanjo() {
     if (_audioCtx) return;
@@ -349,6 +350,9 @@
     if (!_audioCtx) return;
     if (_audioCtx.state === 'suspended') _audioCtx.resume();
 
+    // Block new strums while one is still ringing — no overlapping cacophony.
+    if (_audioCtx.currentTime < _busyUntil) return;
+
     // Pick one root + voicing for the whole phrase — same chord, three strums,
     // so it sounds like a deliberate bluegrass figure rather than three
     // unrelated plucks.
@@ -373,9 +377,15 @@
 
     const now = _audioCtx.currentTime;
 
+    // worst-case ring-out per string ~0.6s (capped in _scheduleSine).
+    // Plus worst-case in-strum stagger of ~0.045s × (voicing.length - 1).
+    const ringTail = 0.6 + (voicing.length - 1) * 0.045;
+    let lastStrumStart;
+
     if (voicing.length === 1) {
       // single notes don't get strummed — just one pluck
       _scheduleStrum(root, voicing, now, body);
+      lastStrumStart = now;
     } else {
       // strum — (pause) — strum — strum
       // longGap: rest between 1st and 2nd strum (~180-250ms)
@@ -386,7 +396,10 @@
       _scheduleStrum(root, voicing, now,                       body);
       _scheduleStrum(root, voicing, now + longGap,             body);
       _scheduleStrum(root, voicing, now + longGap + shortGap,  body);
+      lastStrumStart = now + longGap + shortGap;
     }
+
+    _busyUntil = lastStrumStart + ringTail;
   }
 
   // ============================================================
