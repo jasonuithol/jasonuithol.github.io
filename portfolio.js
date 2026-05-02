@@ -341,12 +341,15 @@
     const chord = voicing.map(m => root * m);
     _scheduleDrumhead(_audioCtx, startTime, output);
 
-    // 2-note voicings aren't a strum — they're two distinct plucks, so use a
-    // much wider gap (~110-170ms). 3+ notes get the fast strum stagger
-    // across strings (10-45ms). Plus tiny per-string jitter for human feel.
-    const baseStagger = chord.length === 2
-      ? 0.110 + Math.random() * 0.060
-      : 0.010 + Math.random() * 0.035;
+    // Stagger depends on what the voicing represents:
+    //   2 notes  = two distinct plucks (wide gap, 110-170ms)
+    //   4 notes  = one hard fast strum across all strings (6-12ms)
+    //   3 notes  = standard bluegrass strum (10-45ms)
+    // Plus tiny per-string jitter for human feel.
+    const baseStagger =
+      chord.length === 2 ? 0.110 + Math.random() * 0.060 :
+      chord.length === 4 ? 0.003 + Math.random() * 0.004 :
+                           0.010 + Math.random() * 0.035;
     let t = startTime;
     chord.forEach(f => {
       _scheduleString(_audioCtx, f, t, output);
@@ -382,26 +385,24 @@
     shaper.oversample = '2x';
 
     const gain = _audioCtx.createGain();
-    gain.gain.value = 0.18;
+    // 4-note voicings get a harder stroke — louder output for the big strum.
+    gain.gain.value = voicing.length === 4 ? 0.27 : 0.18;
 
     body.connect(shaper).connect(gain).connect(_audioCtx.destination);
 
     const now = _audioCtx.currentTime;
 
     // worst-case ring-out per string ~0.6s (capped in _scheduleSine), plus
-    // the gap between notes. 2-note plucks use the wide gap (~0.17s);
-    // strummed chords use the narrow stagger (~0.045s).
-    const maxGap = voicing.length === 2 ? 0.17 : 0.045;
+    // the gap between notes (matches the choices in _scheduleStrum).
+    const maxGap =
+      voicing.length === 2 ? 0.17 :
+      voicing.length === 4 ? 0.007 :
+                             0.045;
     const ringTail = 0.6 + (voicing.length - 1) * maxGap;
     let lastStrumStart;
 
-    if (voicing.length <= 2) {
-      // 1 note = single pluck. 2 notes = two plucks with the natural strum
-      // stagger between them. Neither needs the bluegrass repeat figure.
-      _scheduleStrum(root, voicing, now, body);
-      lastStrumStart = now;
-    } else {
-      // strum — (pause) — strum — strum
+    if (voicing.length === 3) {
+      // strum — (pause) — strum — strum (bluegrass repeat figure)
       // longGap: rest between 1st and 2nd strum (~180-250ms)
       // shortGap: brief tag between 2nd and 3rd (~80-125ms)
       const longGap  = 0.18 + Math.random() * 0.07;
@@ -411,6 +412,11 @@
       _scheduleStrum(root, voicing, now + longGap,             body);
       _scheduleStrum(root, voicing, now + longGap + shortGap,  body);
       lastStrumStart = now + longGap + shortGap;
+    } else {
+      // 1 note = single pluck. 2 notes = two distinct plucks. 4 notes = one
+      // hard fast strum across all strings. None get the bluegrass repeat.
+      _scheduleStrum(root, voicing, now, body);
+      lastStrumStart = now;
     }
 
     _busyUntil = lastStrumStart + ringTail;
