@@ -191,7 +191,16 @@
   // collapses within ~80ms; (3) a separate inharmonic drumhead voice;
   // (4) percussive pick-noise transient.
 
-  const BANJO_ROOTS = [196.00, 220.00, 246.94, 293.66, 329.63, 392.00];
+  // Diatonic major chords in G major: only the I (G), IV (C), V (D) degrees
+  // produce major triads inside the scale. Picking roots from these means every
+  // strum stays in-key — no random accidentals from B major / E major / etc.
+  const BANJO_ROOTS = [
+    196.00,  // G3
+    261.63,  // C4
+    293.66,  // D4
+    392.00,  // G4
+    523.25,  // C5
+  ];
   const MAJOR_THIRD   = Math.pow(2, 4 / 12);
   const PERFECT_FIFTH = Math.pow(2, 7 / 12);
 
