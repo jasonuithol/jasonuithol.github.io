@@ -157,12 +157,6 @@ const PORTFOLIO_DATA = {
           description: "Encourages a good night's sleep.",
           longDesc: "Companion piece to NightTerrors. Where that one punishes sleeping, this one rewards it. The yin to the yang.",
           language: "C#"
-        },
-        {
-          name: "UnifiedControlPanel",
-          description: "A unified admin control panel for Valheim.",
-          longDesc: "Bring the scattered admin functions of various mods (mine and others) under one roof. Less Alt-Tab, more in-game.",
-          language: "C#"
         }
       ]
     }

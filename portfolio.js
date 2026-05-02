@@ -127,7 +127,7 @@
       card.addEventListener('mouseenter', () => {
         clearTimeout(glitchTimer);
         if (document.body.dataset.mode === 'blue') {
-          playBanjoNote();
+          playBanjoChord();
         } else if (window.glitchText) {
           window.glitchText(nameEl, repo.name, 350);
         }
@@ -183,52 +183,145 @@
   });
 
   // ============================================================
-  // BANJO PLUCK (Karplus-Strong) — blue-mode hover sound
+  // BANJO STRUM (modal/additive synthesis) — blue-mode hover sound
   // ============================================================
-  // G major pentatonic across two octaves; pick at random per pluck.
-  const BANJO_FREQS = [196.00, 220.00, 246.94, 293.66, 329.63, 392.00, 440.00, 493.88, 587.33, 659.25];
+  // Banjos sound nothing like a clean plucked string (= harpsichord). The
+  // signature comes from: (1) inharmonic partials — stiff strings sharpen
+  // upper harmonics; (2) very fast decay of high partials so brightness
+  // collapses within ~80ms; (3) a separate inharmonic drumhead voice;
+  // (4) percussive pick-noise transient.
+
+  const BANJO_ROOTS = [196.00, 220.00, 246.94, 293.66, 329.63, 392.00];
+  const MAJOR_THIRD   = Math.pow(2, 4 / 12);
+  const PERFECT_FIFTH = Math.pow(2, 7 / 12);
+
+  // String partials: [freq-multiplier, peak gain, decay-rate (1/s)].
+  // Multipliers >1 are deliberately sharpened (1.00, 2.02, 3.05...) to model
+  // string stiffness — this is the ear-cue that says "metal/plastic", not "wood".
+  // Higher partials decay much faster -> the bright "shimmer drop" of a banjo.
+  const STRING_PARTIALS = [
+    [1.00, 0.45,  6],
+    [2.02, 0.32, 12],
+    [3.05, 0.24, 20],
+    [4.10, 0.16, 32],
+    [5.18, 0.10, 48],
+    [6.30, 0.06, 70],
+  ];
+
+  // Drumhead modes: inharmonic, low, very fast decay. One set per chord (not per string).
+  const HEAD_MODES = [[185, 0.55, 28], [285, 0.35, 42], [430, 0.22, 65]];
+
   let _audioCtx = null;
-  let _banjoBuffers = null;
+  let _shaperCurve = null;
 
   function _initBanjo() {
     if (_audioCtx) return;
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
     _audioCtx = new Ctx();
-    _banjoBuffers = BANJO_FREQS.map(f => _makeBanjoBuffer(_audioCtx, f, 1.0));
   }
 
-  function _makeBanjoBuffer(ctx, freq, durSec) {
-    const sr = ctx.sampleRate;
-    const len = Math.floor(sr * durSec);
-    const delay = Math.max(2, Math.floor(sr / freq));
-    const ks = new Float32Array(delay);
-    for (let i = 0; i < delay; i++) ks[i] = Math.random() * 2 - 1;
-    const buf = ctx.createBuffer(1, len, sr);
-    const data = buf.getChannelData(0);
-    let idx = 0;
-    // damping < 0.5 -> energy loss per round; 0.496 = bright twangy banjo decay
-    for (let i = 0; i < len; i++) {
-      const s = ks[idx];
-      data[i] = s;
-      const next = (idx + 1) % delay;
-      ks[idx] = (s + ks[next]) * 0.496;
-      idx = next;
+  // Asymmetric soft-clip: cheap-construction nonlinearity. The DC offset before
+  // tanh shifts the operating point off-center, producing both odd AND even
+  // harmonics — the "nasal/honky" coloration of a thin bridge flexing.
+  function _getShaperCurve() {
+    if (_shaperCurve) return _shaperCurve;
+    const n = 1024, k = 2.2, off = 0.10;
+    const c = new Float32Array(n);
+    const norm = Math.tanh(k);
+    for (let i = 0; i < n; i++) {
+      const x = (i / (n - 1)) * 2 - 1;
+      c[i] = (Math.tanh(k * (x + off)) - Math.tanh(k * off)) / norm;
     }
-    return buf;
+    _shaperCurve = c;
+    return _shaperCurve;
   }
 
-  function playBanjoNote() {
-    _initBanjo();
-    if (!_audioCtx || !_banjoBuffers) return;
-    if (_audioCtx.state === 'suspended') _audioCtx.resume();
-    const buf = _banjoBuffers[Math.floor(Math.random() * _banjoBuffers.length)];
-    const src = _audioCtx.createBufferSource();
+  // Schedule one sine partial with exponential decay envelope.
+  function _scheduleSine(ctx, freq, gainAmp, decayRate, t0, output) {
+    const dur = Math.min(0.6, Math.max(0.06, 5 / decayRate));
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t0);
+    env.gain.exponentialRampToValueAtTime(gainAmp, t0 + 0.002); // 2ms attack
+    env.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(env).connect(output);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  // Brief bright noise burst — the actual physical sound of finger/pick
+  // crossing the string before the string takes over. Per-string.
+  function _schedulePickNoise(ctx, t0, output) {
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * 0.035);
+    const buf = ctx.createBuffer(1, len, sr);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      d[i] = (Math.random() * 2 - 1) * Math.exp(-(i / sr) * 110);
+    }
+    const src = ctx.createBufferSource();
     src.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2400;
+    bp.Q.value = 0.8;
+    const g = ctx.createGain();
+    g.gain.value = 0.55;
+    src.connect(bp).connect(g).connect(output);
+    src.start(t0);
+  }
+
+  function _scheduleString(ctx, freq, t0, output) {
+    STRING_PARTIALS.forEach(([mult, g, decay]) => {
+      _scheduleSine(ctx, freq * mult, g, decay, t0, output);
+    });
+    _schedulePickNoise(ctx, t0, output);
+  }
+
+  function _scheduleDrumhead(ctx, t0, output) {
+    HEAD_MODES.forEach(([f, g, decay]) => {
+      _scheduleSine(ctx, f, g, decay, t0, output);
+    });
+  }
+
+  function playBanjoChord() {
+    _initBanjo();
+    if (!_audioCtx) return;
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+
+    const root = BANJO_ROOTS[Math.floor(Math.random() * BANJO_ROOTS.length)];
+    const chord = [root, root * MAJOR_THIRD, root * PERFECT_FIFTH];
+
+    // Output chain: bus everything through the cheap-wood color stack.
+    // body resonance — the woody "honk" peak around 360Hz (small wood shell)
+    const body = _audioCtx.createBiquadFilter();
+    body.type = 'peaking';
+    body.frequency.value = 360;
+    body.Q.value = 8;
+    body.gain.value = 5;
+
+    // soft saturation = "twack" — generates harmonics not in the source
+    const shaper = _audioCtx.createWaveShaper();
+    shaper.curve = _getShaperCurve();
+    shaper.oversample = '2x';
+
     const gain = _audioCtx.createGain();
-    gain.gain.value = 0.28;
-    src.connect(gain).connect(_audioCtx.destination);
-    src.start();
+    gain.gain.value = 0.18;
+
+    body.connect(shaper).connect(gain).connect(_audioCtx.destination);
+
+    const now = _audioCtx.currentTime;
+
+    // Drumhead fires once at strum start (it's a single instrument).
+    _scheduleDrumhead(_audioCtx, now, body);
+
+    // Each string staggered = strum across them, not piano block chord.
+    chord.forEach((f, i) => {
+      _scheduleString(_audioCtx, f, now + i * 0.022, body);
+    });
   }
 
   // ============================================================
