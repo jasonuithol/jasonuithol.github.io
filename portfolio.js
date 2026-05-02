@@ -690,11 +690,6 @@
       bgTo      = isToMatrix ? NEAR_BLACK : CREAM;
       activeLabel = btn.querySelector(isToMatrix ? '.t-blue' : '.t-red');
       origLabel = activeLabel ? activeLabel.textContent : '';
-      // Lock the button's current dimensions so glitched-text reflow can't
-      // shake the whole footer row.
-      const r = btn.getBoundingClientRect();
-      btn.style.width = r.width + 'px';
-      btn.style.height = r.height + 'px';
       resize();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       active = true;
@@ -707,8 +702,6 @@
       cancelAnimationFrame(raf);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (activeLabel) activeLabel.textContent = origLabel;
-      btn.style.width = '';
-      btn.style.height = '';
     }
 
     btn.addEventListener('mouseenter', start);
