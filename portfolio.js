@@ -147,8 +147,9 @@
         clearTimeout(glitchTimer);
         if (document.body.dataset.mode === 'blue') {
           _bluePluckTrigger(card);
-        } else if (window.glitchText) {
-          window.glitchText(nameEl, repo.name, 350);
+        } else {
+          if (window.glitchText) window.glitchText(nameEl, repo.name, 350);
+          playGlitch();
         }
       });
       card.addEventListener('mouseleave', () => {
@@ -354,23 +355,27 @@
     });
   }
 
+  // Cut off whatever's currently ringing — fast gain ramp + disconnect.
+  // Shared by banjo + glitch so any new sound silences the previous one
+  // regardless of type.
+  function _silenceCurrent() {
+    if (!_currentGain || !_audioCtx) return;
+    const t = _audioCtx.currentTime;
+    try {
+      _currentGain.gain.cancelScheduledValues(t);
+      _currentGain.gain.setValueAtTime(_currentGain.gain.value, t);
+      _currentGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
+      const old = _currentGain;
+      setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 60);
+    } catch (e) { /* node in bad state — ignore */ }
+    _currentGain = null;
+  }
+
   function playBanjoChord() {
     _initBanjo();
     if (!_audioCtx) return;
     if (_audioCtx.state === 'suspended') _audioCtx.resume();
-
-    // Cut off any chord still ringing — fast gain ramp + disconnect.
-    if (_currentGain) {
-      const t = _audioCtx.currentTime;
-      try {
-        _currentGain.gain.cancelScheduledValues(t);
-        _currentGain.gain.setValueAtTime(_currentGain.gain.value, t);
-        _currentGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
-        const old = _currentGain;
-        setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 60);
-      } catch (e) { /* node already in a bad state — ignore */ }
-      _currentGain = null;
-    }
+    _silenceCurrent();
 
     const root = BANJO_ROOTS[Math.floor(Math.random() * BANJO_ROOTS.length)];
     const voicing = VOICINGS[Math.floor(Math.random() * VOICINGS.length)];
@@ -413,6 +418,77 @@
   // any in-flight ringing.
   function _bluePluckTrigger() {
     playBanjoChord();
+  }
+
+  // Schedule a single short glitch burst at t0, routed through `output`.
+  // Sample-and-hold noise + square wave doing random freq jumps.
+  function _scheduleGlitchBurst(t0, output) {
+    const ctx = _audioCtx;
+    const dur = 0.035 + Math.random() * 0.045;
+
+    // Sample-and-hold noise — chunky, low-bit-depth feel.
+    const sr = ctx.sampleRate;
+    const noiseLen = Math.floor(sr * dur);
+    const buf = ctx.createBuffer(1, noiseLen, sr);
+    const d = buf.getChannelData(0);
+    const hold = 4 + Math.floor(Math.random() * 6);
+    let v = 0;
+    for (let i = 0; i < noiseLen; i++) {
+      if (i % hold === 0) v = Math.random() * 2 - 1;
+      d[i] = v;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(2200 + Math.random() * 2200, t0);
+    bp.frequency.exponentialRampToValueAtTime(700 + Math.random() * 1200, t0 + dur);
+    bp.Q.value = 5;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.6, t0);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    src.connect(bp).connect(noiseGain).connect(output);
+    src.start(t0);
+
+    // Square wave with discrete random freq jumps — bit-error texture.
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(300 + Math.random() * 800, t0);
+    const jumps = 3 + Math.floor(Math.random() * 4);
+    for (let i = 1; i < jumps; i++) {
+      osc.frequency.setValueAtTime(180 + Math.random() * 1600, t0 + (i * dur) / jumps);
+    }
+    const oscGain = ctx.createGain();
+    oscGain.gain.setValueAtTime(0.07, t0);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    osc.connect(oscGain).connect(output);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.01);
+  }
+
+  // String of glitch bursts spread over the same ~350ms window as the
+  // text glitch animation, so audio + visual sync up.
+  function playGlitch() {
+    _initBanjo();
+    if (!_audioCtx) return;
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    _silenceCurrent();
+
+    const ctx = _audioCtx;
+    const now = ctx.currentTime;
+    const windowSec = 0.35;
+
+    const master = ctx.createGain();
+    master.gain.value = 0.32;
+    master.connect(ctx.destination);
+
+    const N = 6 + Math.floor(Math.random() * 4); // 6-9 bursts
+    for (let i = 0; i < N; i++) {
+      const t = now + (i / N) * windowSec + (Math.random() - 0.5) * 0.035;
+      _scheduleGlitchBurst(Math.max(now, t), master);
+    }
+
+    _currentGain = master;
   }
 
   // ============================================================
