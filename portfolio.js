@@ -146,9 +146,14 @@
       card.addEventListener('mouseenter', () => {
         clearTimeout(glitchTimer);
         if (document.body.dataset.mode === 'blue') {
-          playBanjoChord();
+          _bluePluckTrigger(card);
         } else if (window.glitchText) {
           window.glitchText(nameEl, repo.name, 350);
+        }
+      });
+      card.addEventListener('mouseleave', () => {
+        if (document.body.dataset.mode === 'blue') {
+          _bluePluckCancel(card);
         }
       });
 
@@ -242,6 +247,8 @@
   let _audioCtx = null;
   let _shaperCurve = null;
   let _busyUntil = 0; // audioCtx.currentTime past which a new strum is allowed
+  let _pendingCard = null;
+  let _pendingTimer = null;
 
   function _initBanjo() {
     if (_audioCtx) return;
@@ -334,9 +341,12 @@
     const chord = voicing.map(m => root * m);
     _scheduleDrumhead(_audioCtx, startTime, output);
 
-    // Per-strum stagger 10-45ms — frantic flick vs. lazy drag — plus tiny
-    // per-string jitter so consecutive strums never sound mechanical.
-    const baseStagger = 0.010 + Math.random() * 0.035;
+    // 2-note voicings aren't a strum — they're two distinct plucks, so use a
+    // much wider gap (~110-170ms). 3+ notes get the fast strum stagger
+    // across strings (10-45ms). Plus tiny per-string jitter for human feel.
+    const baseStagger = chord.length === 2
+      ? 0.110 + Math.random() * 0.060
+      : 0.010 + Math.random() * 0.035;
     let t = startTime;
     chord.forEach(f => {
       _scheduleString(_audioCtx, f, t, output);
@@ -345,13 +355,14 @@
     });
   }
 
+  // Returns true if a strum was actually scheduled, false if blocked.
   function playBanjoChord() {
     _initBanjo();
-    if (!_audioCtx) return;
+    if (!_audioCtx) return false;
     if (_audioCtx.state === 'suspended') _audioCtx.resume();
 
     // Block new strums while one is still ringing — no overlapping cacophony.
-    if (_audioCtx.currentTime < _busyUntil) return;
+    if (_audioCtx.currentTime < _busyUntil) return false;
 
     // Pick one root + voicing for the whole phrase — same chord, three strums,
     // so it sounds like a deliberate bluegrass figure rather than three
@@ -377,13 +388,16 @@
 
     const now = _audioCtx.currentTime;
 
-    // worst-case ring-out per string ~0.6s (capped in _scheduleSine).
-    // Plus worst-case in-strum stagger of ~0.045s × (voicing.length - 1).
-    const ringTail = 0.6 + (voicing.length - 1) * 0.045;
+    // worst-case ring-out per string ~0.6s (capped in _scheduleSine), plus
+    // the gap between notes. 2-note plucks use the wide gap (~0.17s);
+    // strummed chords use the narrow stagger (~0.045s).
+    const maxGap = voicing.length === 2 ? 0.17 : 0.045;
+    const ringTail = 0.6 + (voicing.length - 1) * maxGap;
     let lastStrumStart;
 
-    if (voicing.length === 1) {
-      // single notes don't get strummed — just one pluck
+    if (voicing.length <= 2) {
+      // 1 note = single pluck. 2 notes = two plucks with the natural strum
+      // stagger between them. Neither needs the bluegrass repeat figure.
       _scheduleStrum(root, voicing, now, body);
       lastStrumStart = now;
     } else {
@@ -400,6 +414,34 @@
     }
 
     _busyUntil = lastStrumStart + ringTail;
+    return true;
+  }
+
+  // Hover trigger: try to strum now. If blocked because another strum is
+  // ringing, queue a single retry — but only fire it if the cursor is still
+  // inside this same card when the busy period ends.
+  function _bluePluckTrigger(card) {
+    if (playBanjoChord()) {
+      _pendingCard = null;
+      clearTimeout(_pendingTimer);
+      return;
+    }
+    _pendingCard = card;
+    clearTimeout(_pendingTimer);
+    const waitMs = Math.max(0, (_busyUntil - _audioCtx.currentTime) * 1000) + 15;
+    _pendingTimer = setTimeout(() => {
+      if (_pendingCard === card) {
+        playBanjoChord();
+        _pendingCard = null;
+      }
+    }, waitMs);
+  }
+
+  function _bluePluckCancel(card) {
+    if (_pendingCard === card) {
+      clearTimeout(_pendingTimer);
+      _pendingCard = null;
+    }
   }
 
   // ============================================================
