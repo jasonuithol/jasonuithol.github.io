@@ -514,13 +514,12 @@
       if (window.matrixRain && document.body.dataset.mode === 'red') {
         window.matrixRain.burst();
       }
-      // Mode just flipped while cursor is still on the button — restart
-      // the hover effect in the new direction so we don't render a frozen
-      // halfway state until the mouse leaves.
-      if (rainCtl && swapBtn.matches(':hover')) {
-        rainCtl.stop();
-        rainCtl.start();
-      }
+      if (rainCtl) rainCtl.stop();
+      // Both html and body are constrained to height:100% with overflow auto,
+      // so the actual scroll container varies. Hit all the candidates.
+      const el = document.scrollingElement || document.documentElement;
+      el.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
