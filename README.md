@@ -1,6 +1,6 @@
 # easyCoder — portfolio showcase
 
-['CLICK HERE FOR PORTFOLIO'](https://jasonuithol.github.io/)
+[CLICK HERE FOR PORTFOLIO](https://jasonuithol.github.io/)
 
 A matrix-themed single-page portfolio for the [`jasonuithol`](https://github.com/jasonuithol) GitHub account. Pure HTML/CSS/JS, zero build step, drops straight onto GitHub Pages.
 
