@@ -698,34 +698,6 @@ body[data-mode="blue"] #matrix-canvas {
   transition: opacity 1.2s ease;
 }
 
-/* dreamy floating watercolor blobs in the background */
-body[data-mode="blue"] {
-  background-image:
-    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(158, 184, 154, 0.35) 0%, transparent 60%),
-    radial-gradient(ellipse 500px 500px at 85% 30%, rgba(201, 169, 156, 0.30) 0%, transparent 60%),
-    radial-gradient(ellipse 700px 400px at 50% 85%, rgba(212, 165, 116, 0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 400px 400px at 90% 90%, rgba(170, 193, 201, 0.25) 0%, transparent 60%);
-  background-attachment: fixed;
-  background-size: 100% 100%;
-  animation: blue-drift 30s ease-in-out infinite alternate;
-}
-@keyframes blue-drift {
-  0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 100% 100%; }
-  100% { background-position: 5% 5%, 95% 5%, 45% 95%, 95% 105%; }
-}
-
-/* paper-grain texture overlay (replaces scanlines) */
-body[data-mode="blue"] #portfolio::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    repeating-radial-gradient(circle at 13% 27%, rgba(74, 64, 54, 0.015) 0 1px, transparent 1px 4px),
-    repeating-radial-gradient(circle at 77% 63%, rgba(74, 64, 54, 0.012) 0 1px, transparent 1px 5px);
-  pointer-events: none;
-  z-index: 0;
-  mix-blend-mode: multiply;
-}
 
 /* -------- header -------- */
 body[data-mode="blue"] .site-header {
