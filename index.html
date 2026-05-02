@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>jasonuithol :: easyCoder</title>
+<meta name="description" content="The attic. A portfolio of repositories by jasonuithol — agentic AI, games, and Valheim mods." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- code rain canvas (behind everything) -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- ============================================================
+     INTRO SEQUENCE
+     ============================================================ -->
+<div id="intro">
+  <div class="intro-terminal" id="intro-terminal"></div>
+  <div class="pill-choice" id="pill-choice">
+    <button class="pill pill-red" id="pill-red">
+      RED
+      <span class="pill-label">— show me everything</span>
+    </button>
+    <button class="pill pill-blue" id="pill-blue">
+      BLUE
+      <span class="pill-label">— just the repos, please</span>
+    </button>
+  </div>
+  <button class="skip-intro" id="skip-intro">[ ESC :: skip ]</button>
+</div>
+
+<!-- ============================================================
+     MAIN PORTFOLIO
+     ============================================================ -->
+<main id="portfolio">
+
+  <header class="site-header">
+    <h1 class="site-title">
+      easyCoder<span class="underscore-cursor">_</span>
+    </h1>
+    <p class="site-subtitle">
+      <span class="prompt">$</span> whoami → <span id="site-handle">jasonuithol</span>
+    </p>
+    <div class="site-meta">
+      <span><span id="site-tagline">welcome to the attic</span></span>
+      <span><span id="repo-total">0</span> public repositories</span>
+      <span><a id="site-github-link" href="#" target="_blank" rel="noopener">github.com</a></span>
+    </div>
+  </header>
+
+  <div id="clusters"></div>
+
+  <footer class="site-footer">
+    <span>© <span id="year"></span> jasonuithol — every line written under the green glow.</span>
+    <span class="hint">try: ↑↑↓↓←→←→ba · type "whoami"</span>
+  </footer>
+
+</main>
+
+<!-- ============================================================
+     DOSSIER MODAL
+     ============================================================ -->
+<div id="dossier" role="dialog" aria-modal="true" aria-labelledby="dossier-title">
+  <div class="dossier-panel">
+    <div class="dossier-titlebar">
+      <span class="dossier-titlebar-left" id="dossier-title">DOSSIER.dat</span>
+      <button class="dossier-close" id="dossier-close" aria-label="close">×</button>
+    </div>
+    <div class="dossier-body" id="dossier-body"></div>
+  </div>
+</div>
+
+<!-- easter-egg overlay -->
+<div id="kungfu-overlay">I know kung fu.</div>
+
+<!-- scripts -->
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="repos.js"></script>
+<script src="matrix.js"></script>
+<script src="portfolio.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,1066 @@
+/* ============================================================
+   JASONUITHOL.SYS — portfolio stylesheet
+   Theme: maximum-theatrics matrix
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Major+Mono+Display&display=swap');
+
+:root {
+  --bg: #000508;
+  --bg-deep: #00020a;
+  --green: #00ff41;
+  --green-dim: #008f1f;
+  --green-faint: #003a0d;
+  --green-glow: #00ff4180;
+  --cyan: #00fff0;
+  --amber: #ffb000;
+  --red: #ff2a2a;
+  --blue: #2a8fff;
+  --text: #c8ffd5;
+  --text-dim: #6fbe7e;
+
+  --font-display: 'Major Mono Display', monospace;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-terminal: 'VT323', monospace;
+
+  --scan: rgba(0, 255, 65, 0.04);
+}
+
+/* -------- reset -------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow-x: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.5;
+  cursor: default;
+  position: relative;
+  min-height: 100vh;
+}
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+button { font-family: inherit; }
+
+/* -------- global atmosphere -------- */
+body::before {
+  /* scanline overlay */
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    var(--scan) 2px,
+    var(--scan) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: overlay;
+}
+body::after {
+  /* vignette */
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* code-rain canvas sits behind everything */
+#matrix-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ============================================================
+   INTRO SEQUENCE
+   ============================================================ */
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg-deep);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  transition: opacity 1.2s ease-out;
+}
+#intro.fading { opacity: 0; pointer-events: none; }
+
+.intro-terminal {
+  width: 100%;
+  max-width: 720px;
+  font-family: var(--font-terminal);
+  font-size: 1.5rem;
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green-glow);
+  white-space: pre-wrap;
+  min-height: 280px;
+}
+.intro-terminal .line { display: block; }
+.intro-terminal .cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  animation: blink 1s steps(2, end) infinite;
+  box-shadow: 0 0 8px var(--green-glow);
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.pill-choice {
+  margin-top: 3rem;
+  display: flex;
+  gap: 4rem;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.pill-choice.visible { opacity: 1; }
+.pill {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 3px solid;
+  font-family: var(--font-terminal);
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.pill::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.3;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0; }
+}
+.pill-red {
+  color: var(--red);
+  border-color: var(--red);
+  text-shadow: 0 0 12px var(--red);
+  box-shadow: 0 0 24px rgba(255, 42, 42, 0.4), inset 0 0 24px rgba(255, 42, 42, 0.1);
+}
+.pill-red:hover {
+  background: var(--red);
+  color: #000;
+  box-shadow: 0 0 48px var(--red);
+  transform: scale(1.1);
+}
+.pill-blue {
+  color: var(--blue);
+  border-color: var(--blue);
+  text-shadow: 0 0 12px var(--blue);
+  box-shadow: 0 0 24px rgba(42, 143, 255, 0.4), inset 0 0 24px rgba(42, 143, 255, 0.1);
+}
+.pill-blue:hover {
+  background: var(--blue);
+  color: #000;
+  box-shadow: 0 0 48px var(--blue);
+  transform: scale(1.1);
+}
+.pill-label {
+  position: absolute;
+  bottom: -2.5rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0.6;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.skip-intro {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.2s;
+}
+.skip-intro:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(0, 255, 65, 0.05);
+}
+
+/* ============================================================
+   MAIN PORTFOLIO
+   ============================================================ */
+#portfolio {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+  opacity: 0;
+  transition: opacity 1.5s ease-in 0.3s;
+}
+#portfolio.visible { opacity: 1; }
+
+/* -------- header -------- */
+.site-header {
+  margin-bottom: 4rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px dashed var(--green-faint);
+  position: relative;
+}
+.site-header::after {
+  content: '◢';
+  position: absolute;
+  bottom: -8px;
+  right: 0;
+  color: var(--green);
+  font-size: 0.8rem;
+  text-shadow: 0 0 6px var(--green-glow);
+}
+
+.site-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  color: var(--green);
+  text-shadow: 0 0 16px var(--green-glow), 0 0 4px #fff;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+.site-title .underscore-cursor {
+  display: inline-block;
+  animation: blink 1s steps(2) infinite;
+  color: var(--cyan);
+}
+
+.site-subtitle {
+  font-family: var(--font-terminal);
+  font-size: 1.4rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+}
+.site-subtitle .prompt { color: var(--cyan); }
+
+.site-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+.site-meta span::before { content: '> '; color: var(--green); }
+.site-meta a { color: var(--cyan); border-bottom: 1px dotted var(--cyan); }
+
+/* -------- cluster -------- */
+.cluster {
+  margin-bottom: 4.5rem;
+  position: relative;
+}
+.cluster-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--green-faint);
+  flex-wrap: wrap;
+}
+.cluster-glyph {
+  font-size: 1.8rem;
+  color: var(--cyan);
+  text-shadow: 0 0 10px var(--cyan);
+}
+.cluster-name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green-glow);
+  letter-spacing: 0.1em;
+}
+.cluster-count {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+.cluster-count::before { content: '['; }
+.cluster-count::after { content: ']'; }
+.cluster-description {
+  width: 100%;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.cluster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+/* -------- repo card (terminal window aesthetic) -------- */
+.repo-card {
+  background: linear-gradient(180deg, rgba(0, 30, 12, 0.85), rgba(0, 10, 5, 0.92));
+  border: 1px solid var(--green-faint);
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+}
+.repo-card::before {
+  /* terminal title bar */
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(0, 255, 65, 0.12), transparent);
+  border-bottom: 1px solid var(--green-faint);
+}
+.repo-card::after {
+  /* corner glow */
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+  opacity: 0.6;
+}
+.repo-card:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 255, 65, 0.15), 0 0 0 1px var(--green-glow);
+}
+.repo-card:hover::after { opacity: 1; animation: pulse-dot 1s ease-in-out infinite; }
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 8px var(--green-glow); }
+  50% { box-shadow: 0 0 16px var(--green); }
+}
+
+.repo-card-content {
+  padding: 2rem 1.25rem 1.25rem;
+}
+.repo-name {
+  font-family: var(--font-terminal);
+  font-size: 1.6rem;
+  color: var(--green);
+  margin-bottom: 0.75rem;
+  word-break: break-word;
+  line-height: 1.1;
+  text-shadow: 0 0 6px var(--green-glow);
+}
+.repo-name::before {
+  content: '$ ';
+  color: var(--cyan);
+}
+.repo-desc {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  min-height: 3em;
+}
+.repo-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+.repo-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.repo-lang::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--cyan);
+}
+.repo-action {
+  color: var(--green);
+  opacity: 0.7;
+}
+.repo-card:hover .repo-action { opacity: 1; }
+
+/* glitch hover effect — character shuffle */
+.repo-card.glitching .repo-name {
+  animation: glitch-name 0.3s steps(3) 1;
+}
+@keyframes glitch-name {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); text-shadow: 2px 0 var(--cyan), -2px 0 var(--red); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  100% { transform: translate(0); }
+}
+
+/* ============================================================
+   DOSSIER MODAL
+   ============================================================ */
+#dossier {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 5, 8, 0.92);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#dossier.open { display: flex; opacity: 1; }
+
+.dossier-panel {
+  width: 100%;
+  max-width: 880px;
+  max-height: 90vh;
+  background: var(--bg-deep);
+  border: 1px solid var(--green);
+  box-shadow: 0 0 64px rgba(0, 255, 65, 0.25), inset 0 0 64px rgba(0, 255, 65, 0.04);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+#dossier.open .dossier-panel { transform: scale(1); }
+
+.dossier-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(180deg, rgba(0, 255, 65, 0.12), transparent);
+  border-bottom: 1px solid var(--green-faint);
+  font-family: var(--font-terminal);
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+.dossier-titlebar-left { display: flex; gap: 0.5rem; align-items: center; }
+.dossier-titlebar-left::before {
+  content: '● ● ●';
+  color: var(--green);
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+  margin-right: 0.5rem;
+}
+.dossier-close {
+  background: transparent;
+  border: 1px solid var(--green-faint);
+  color: var(--green);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.dossier-close:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #000;
+}
+
+.dossier-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+.dossier-body::-webkit-scrollbar { width: 8px; }
+.dossier-body::-webkit-scrollbar-track { background: var(--bg); }
+.dossier-body::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+.dossier-name {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--green);
+  text-shadow: 0 0 12px var(--green-glow);
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+.dossier-tags {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.dossier-tag {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--green-faint);
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+.dossier-tag.lang { border-color: var(--cyan); color: var(--cyan); }
+
+.dossier-section {
+  margin-bottom: 1.75rem;
+}
+.dossier-section h3 {
+  font-family: var(--font-terminal);
+  font-size: 1.1rem;
+  color: var(--cyan);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.dossier-section h3::before { content: '// '; opacity: 0.6; }
+
+.dossier-desc {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.dossier-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+.dossier-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  background: rgba(0, 255, 65, 0.05);
+  transition: all 0.2s;
+}
+.dossier-link:hover {
+  background: var(--green);
+  color: #000;
+}
+
+/* ============================================================
+   EASTER EGGS
+   ============================================================ */
+#kungfu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg-deep);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 4rem;
+  color: var(--green);
+  text-shadow: 0 0 20px var(--green-glow);
+  animation: kungfu-flash 2.5s ease-out forwards;
+}
+#kungfu-overlay.show { display: flex; }
+@keyframes kungfu-flash {
+  0%   { opacity: 0; transform: scale(0.8); }
+  20%  { opacity: 1; transform: scale(1); }
+  80%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px dashed var(--green-faint);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.site-footer .hint {
+  font-family: var(--font-terminal);
+  font-size: 0.95rem;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+  #portfolio { padding: 1.5rem 1rem 4rem; }
+  .pill-choice { gap: 1.5rem; }
+  .pill { width: 110px; height: 110px; font-size: 1.1rem; }
+  .cluster-grid { grid-template-columns: 1fr; }
+  .dossier-body { padding: 1.25rem; }
+  .dossier-name { font-size: 1.6rem; }
+}
+
+/* ============================================================
+   FOOTER — RIGHT SIDE
+   ============================================================ */
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.mode-swap {
+  background: transparent;
+  border: 1px solid var(--green-faint);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+.mode-swap:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(0, 255, 65, 0.05);
+}
+
+/* ============================================================
+   ============================================================
+   BLUE MODE — "barely sufferable banjo-wielding fake-hippy"
+   pastel cottagecore-tech aesthetic.
+   Tech-bro copy under a Pinterest makeover.
+   ============================================================
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+
+body[data-mode="blue"] {
+  /* "organic" palette that is 100% manufactured */
+  --bg: #f5efe6;          /* oat milk */
+  --bg-deep: #ede4d3;     /* slightly toasted oat milk */
+  --green: #9eb89a;       /* the sage of a thousand instagram bios */
+  --green-dim: #c9d4bf;
+  --green-faint: #e1e6d8;
+  --green-glow: transparent;
+  --cyan: #c9a99c;        /* dusty terracotta */
+  --amber: #d4a574;       /* honey */
+  --red: #d49a9a;         /* blush */
+  --blue: #aac1c9;        /* soft sky */
+  --text: #4a4036;        /* warm brown ink */
+  --text-dim: #8a7d6e;
+  --scan: transparent;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 400;
+  transition: background 0.8s ease, color 0.8s ease;
+}
+
+/* kill the scanlines + vignette */
+body[data-mode="blue"]::before { display: none; }
+body[data-mode="blue"]::after { display: none; }
+
+/* matrix canvas fades out (rendering also halts in blue mode) */
+body[data-mode="blue"] #matrix-canvas {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+/* dreamy floating watercolor blobs in the background */
+body[data-mode="blue"] {
+  background-image:
+    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(158, 184, 154, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 500px at 85% 30%, rgba(201, 169, 156, 0.30) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 400px at 50% 85%, rgba(212, 165, 116, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 400px 400px at 90% 90%, rgba(170, 193, 201, 0.25) 0%, transparent 60%);
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  animation: blue-drift 30s ease-in-out infinite alternate;
+}
+@keyframes blue-drift {
+  0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 100% 100%; }
+  100% { background-position: 5% 5%, 95% 5%, 45% 95%, 95% 105%; }
+}
+
+/* paper-grain texture overlay (replaces scanlines) */
+body[data-mode="blue"] #portfolio::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-radial-gradient(circle at 13% 27%, rgba(74, 64, 54, 0.015) 0 1px, transparent 1px 4px),
+    repeating-radial-gradient(circle at 77% 63%, rgba(74, 64, 54, 0.012) 0 1px, transparent 1px 5px);
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: multiply;
+}
+
+/* -------- header -------- */
+body[data-mode="blue"] .site-header {
+  border-bottom: 1px solid var(--green-faint);
+}
+body[data-mode="blue"] .site-header::after {
+  content: '✿';
+  color: var(--cyan);
+  font-size: 1.4rem;
+  text-shadow: none;
+  bottom: -16px;
+}
+body[data-mode="blue"] .site-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text);
+  text-shadow: none;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+body[data-mode="blue"] .site-title .underscore-cursor {
+  color: var(--green);
+  animation: none;
+  font-weight: 300;
+}
+body[data-mode="blue"] .site-subtitle {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: var(--text-dim);
+  letter-spacing: 0;
+  transform: rotate(-1deg);
+  display: inline-block;
+}
+body[data-mode="blue"] .site-subtitle .prompt {
+  color: var(--cyan);
+}
+body[data-mode="blue"] .site-meta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+body[data-mode="blue"] .site-meta span::before {
+  content: '· ';
+  color: var(--green);
+}
+body[data-mode="blue"] .site-meta a {
+  color: var(--cyan);
+  border-bottom: 1px dotted var(--cyan);
+}
+body[data-mode="blue"] .site-meta a:hover {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+/* -------- clusters -------- */
+body[data-mode="blue"] .cluster-header {
+  border-bottom: 1px solid var(--green-faint);
+}
+body[data-mode="blue"] .cluster-glyph {
+  color: var(--cyan);
+  text-shadow: none;
+  font-size: 1.5rem;
+}
+body[data-mode="blue"] .cluster-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text);
+  text-shadow: none;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  font-size: 1.7rem;
+}
+/* keep underscores legible — rendered as a soft visual quirk */
+body[data-mode="blue"] .cluster-name {
+  word-spacing: 0.1em;
+}
+body[data-mode="blue"] .cluster-count {
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: var(--green);
+  font-weight: 500;
+}
+body[data-mode="blue"] .cluster-count::before { content: '— '; }
+body[data-mode="blue"] .cluster-count::after { content: ''; }
+body[data-mode="blue"] .cluster-description {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 1rem;
+}
+
+/* -------- repo cards (recipe-card / scrapbook aesthetic) -------- */
+body[data-mode="blue"] .repo-card {
+  background: rgba(255, 252, 245, 0.85);
+  border: 1px solid rgba(158, 184, 154, 0.3);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 2px rgba(74, 64, 54, 0.04),
+    0 8px 24px rgba(74, 64, 54, 0.06);
+  backdrop-filter: blur(6px) saturate(1.1);
+  overflow: hidden;
+}
+body[data-mode="blue"] .repo-card::before {
+  /* swap terminal title bar for a soft watercolor wash at the top */
+  height: 6px;
+  background: linear-gradient(90deg, var(--green) 0%, var(--cyan) 60%, var(--amber) 100%);
+  opacity: 0.5;
+  border: none;
+}
+body[data-mode="blue"] .repo-card::after {
+  /* the corner dot becomes a tiny pastel sticker */
+  background: var(--cyan);
+  box-shadow: none;
+  opacity: 0.4;
+  top: 12px;
+  right: 12px;
+}
+body[data-mode="blue"] .repo-card:hover {
+  border-color: rgba(158, 184, 154, 0.6);
+  box-shadow:
+    0 2px 4px rgba(74, 64, 54, 0.06),
+    0 12px 32px rgba(74, 64, 54, 0.1);
+  transform: translateY(-3px);
+}
+body[data-mode="blue"] .repo-card:hover::after {
+  opacity: 0.8;
+  animation: none;
+}
+body[data-mode="blue"] .repo-card-content {
+  padding: 1.75rem 1.5rem 1.5rem;
+}
+body[data-mode="blue"] .repo-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-size: 1.35rem;
+  color: var(--text);
+  text-shadow: none;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 0.65rem;
+}
+body[data-mode="blue"] .repo-name::before {
+  content: '';
+}
+body[data-mode="blue"] .repo-desc {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.6;
+}
+body[data-mode="blue"] .repo-meta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+body[data-mode="blue"] .repo-lang::before {
+  background: var(--green);
+  box-shadow: none;
+}
+body[data-mode="blue"] .repo-action {
+  color: var(--cyan);
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* glitch hover stays disabled in blue mode */
+body[data-mode="blue"] .repo-card.glitching .repo-name {
+  animation: none;
+}
+
+/* -------- dossier -------- */
+body[data-mode="blue"] #dossier {
+  background: rgba(245, 239, 230, 0.85);
+}
+body[data-mode="blue"] .dossier-panel {
+  background: #fffcf5;
+  border: 1px solid rgba(158, 184, 154, 0.4);
+  border-radius: 24px;
+  box-shadow:
+    0 4px 8px rgba(74, 64, 54, 0.06),
+    0 24px 64px rgba(74, 64, 54, 0.18);
+}
+body[data-mode="blue"] .dossier-titlebar {
+  background: linear-gradient(180deg, rgba(158, 184, 154, 0.15), transparent);
+  border-bottom: 1px solid var(--green-faint);
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  font-weight: 500;
+  padding: 0.85rem 1.25rem;
+}
+body[data-mode="blue"] .dossier-titlebar-left::before {
+  content: '✿ ✿ ✿';
+  color: var(--cyan);
+  letter-spacing: 0.3em;
+  opacity: 0.5;
+  font-size: 0.9rem;
+}
+body[data-mode="blue"] .dossier-close {
+  background: transparent;
+  border: 1px solid var(--green-faint);
+  border-radius: 50%;
+  color: var(--text-dim);
+}
+body[data-mode="blue"] .dossier-close:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+body[data-mode="blue"] .dossier-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text);
+  text-shadow: none;
+  letter-spacing: -0.02em;
+}
+body[data-mode="blue"] .dossier-tag {
+  border: 1px solid var(--green-faint);
+  border-radius: 999px;
+  color: var(--text-dim);
+  background: rgba(158, 184, 154, 0.08);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+body[data-mode="blue"] .dossier-tag.lang {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(201, 169, 156, 0.08);
+}
+body[data-mode="blue"] .dossier-section h3 {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: var(--green);
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+body[data-mode="blue"] .dossier-section h3::before {
+  content: '— ';
+  opacity: 0.5;
+}
+body[data-mode="blue"] .dossier-desc {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.75;
+}
+body[data-mode="blue"] .dossier-link {
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(158, 184, 154, 0.08);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  padding: 0.7rem 1.4rem;
+}
+body[data-mode="blue"] .dossier-link:hover {
+  background: var(--green);
+  color: #fff;
+}
+body[data-mode="blue"] .dossier-body::-webkit-scrollbar-thumb {
+  background: var(--green-dim);
+}
+body[data-mode="blue"] .dossier-body::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+/* -------- footer + mode swap -------- */
+body[data-mode="blue"] .site-footer {
+  border-top: 1px solid var(--green-faint);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-dim);
+}
+body[data-mode="blue"] .site-footer .hint {
+  font-family: 'Caveat', cursive;
+  font-size: 1.05rem;
+  opacity: 0.8;
+}
+body[data-mode="blue"] .mode-swap {
+  border: 1px solid var(--green-faint);
+  border-radius: 999px;
+  color: var(--text-dim);
+  background: rgba(255, 252, 245, 0.6);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  text-transform: lowercase;
+  letter-spacing: 0;
+  padding: 0.4rem 0.95rem;
+}
+body[data-mode="blue"] .mode-swap:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(158, 184, 154, 0.1);
+}
+
+/* -------- kungfu overlay (still works, just pastel) -------- */
+body[data-mode="blue"] #kungfu-overlay {
+  background: var(--bg-deep);
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  color: var(--green);
+  text-shadow: none;
+  font-size: 5rem;
+  font-style: italic;
+}
