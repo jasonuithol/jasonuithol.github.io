@@ -22,6 +22,13 @@
   let introTyping = true;
   let typeIntervalId = null;
 
+  // Audio state — hoisted up here because the intro ambient kicks off
+  // before the rest of the audio code runs, and `let` lives in TDZ until
+  // its declaration is reached.
+  let _audioCtx = null;
+  let _shaperCurve = null;
+  let _currentGain = null; // master gain of the currently-ringing chord, if any
+
   function typeIntro() {
     let lineIdx = 0;
     let charIdx = 0;
@@ -36,9 +43,11 @@
       }
       const currentLine = introLines[lineIdx];
       if (charIdx < currentLine.length) {
-        buffer += currentLine[charIdx];
+        const ch = currentLine[charIdx];
+        buffer += ch;
         charIdx++;
         terminal.innerHTML = buffer + '<span class="cursor"></span>';
+        if (ch !== ' ') playClack();
         typeIntervalId = setTimeout(tick, 30 + Math.random() * 40);
       } else {
         buffer += '\n';
@@ -72,7 +81,23 @@
   document.getElementById('pill-blue').addEventListener('click', () => dismissIntro('blue'));
   skipBtn.addEventListener('click', () => dismissIntro('blue'));
 
-  typeIntro();
+  // Load-gate: forces a user gesture so the AudioContext can run, which
+  // means the per-character clack is audible from the very first character.
+  const loadGate = document.getElementById('load-gate');
+  const loadBtn = document.getElementById('load-program');
+  if (loadGate && loadBtn) {
+    loadBtn.addEventListener('click', () => {
+      // Prime the audio context on the gesture itself, before doing anything else.
+      _initBanjo();
+      if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
+      loadGate.classList.add('fading');
+      setTimeout(() => { loadGate.style.display = 'none'; }, 400);
+      typeIntro();
+    });
+  } else {
+    // No gate present (shouldn't happen) — fall back to immediate start.
+    typeIntro();
+  }
 
   // ============================================================
   // RENDER PORTFOLIO
@@ -243,9 +268,7 @@
   // Drumhead modes: inharmonic, low, very fast decay. One set per chord (not per string).
   const HEAD_MODES = [[185, 0.55, 28], [285, 0.35, 42], [430, 0.22, 65]];
 
-  let _audioCtx = null;
-  let _shaperCurve = null;
-  let _currentGain = null; // master gain of the currently-ringing chord, if any
+  // (audio state vars are hoisted to the top of the IIFE — see intro section)
 
   function _initBanjo() {
     if (_audioCtx) return;
@@ -489,6 +512,64 @@
     }
 
     _currentGain = master;
+  }
+
+  // Per-character muffled clack — the typewriter-thunk for intro typing.
+  // Same construction shape as a glitch burst (sample-and-hold noise +
+  // bandpass) but tuned dark: low center freq, low Q, plus a tiny
+  // sub-thump for body. Doesn't call _silenceCurrent — clacks layer
+  // naturally as the typing rolls.
+  function playClack() {
+    _initBanjo();
+    if (!_audioCtx) return;
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    const ctx = _audioCtx;
+    const t0 = ctx.currentTime;
+    const dur = 0.045 + Math.random() * 0.025;
+
+    const master = ctx.createGain();
+    master.gain.value = 0.55;
+    master.connect(ctx.destination);
+
+    // Sample-and-hold noise body — chunky, low.
+    const sr = ctx.sampleRate;
+    const noiseLen = Math.floor(sr * dur);
+    const buf = ctx.createBuffer(1, noiseLen, sr);
+    const d = buf.getChannelData(0);
+    const hold = 8 + Math.floor(Math.random() * 8); // longer hold = darker
+    let v = 0;
+    for (let i = 0; i < noiseLen; i++) {
+      if (i % hold === 0) v = Math.random() * 2 - 1;
+      d[i] = v;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 260 + Math.random() * 140; // 260-400Hz, muffled
+    bp.Q.value = 1.6;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, t0);
+    noiseGain.gain.exponentialRampToValueAtTime(0.7, t0 + 0.002);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    src.connect(bp).connect(noiseGain).connect(master);
+    src.start(t0);
+
+    // Tiny sub-thump body — gives the clack physical weight.
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(110 + Math.random() * 40, t0);
+    osc.frequency.exponentialRampToValueAtTime(60, t0 + 0.04);
+    const oscGain = ctx.createGain();
+    oscGain.gain.setValueAtTime(0.0001, t0);
+    oscGain.gain.exponentialRampToValueAtTime(0.45, t0 + 0.003);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.05);
+    osc.connect(oscGain).connect(master);
+    osc.start(t0);
+    osc.stop(t0 + 0.07);
+
+    // Disconnect master after the clack is done so we don't leak nodes.
+    setTimeout(() => { try { master.disconnect(); } catch (e) {} }, (dur + 0.05) * 1000 + 30);
   }
 
   // ============================================================

@@ -85,6 +85,46 @@ body::after {
 }
 
 /* ============================================================
+   LOAD GATE — pre-intro click target so the AudioContext can run
+   ============================================================ */
+#load-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease-out;
+}
+#load-gate.fading {
+  opacity: 0;
+  pointer-events: none;
+}
+#load-program {
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  letter-spacing: 0.18em;
+  padding: 1rem 2.2rem;
+  cursor: pointer;
+  text-shadow: 0 0 8px var(--green-glow);
+  box-shadow: 0 0 24px rgba(0, 255, 65, 0.15) inset, 0 0 18px rgba(0, 255, 65, 0.10);
+  animation: loadProgramPulse 1.6s ease-in-out infinite;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+#load-program:hover {
+  background: rgba(0, 255, 65, 0.08);
+  box-shadow: 0 0 24px rgba(0, 255, 65, 0.30) inset, 0 0 32px rgba(0, 255, 65, 0.30);
+}
+@keyframes loadProgramPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(0, 255, 65, 0.15) inset, 0 0 18px rgba(0, 255, 65, 0.10); }
+  50%      { box-shadow: 0 0 24px rgba(0, 255, 65, 0.30) inset, 0 0 28px rgba(0, 255, 65, 0.25); }
+}
+
+/* ============================================================
    INTRO SEQUENCE
    ============================================================ */
 #intro {
