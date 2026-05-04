@@ -157,6 +157,12 @@ const PORTFOLIO_DATA = {
           description: "Encourages a good night's sleep.",
           longDesc: "Companion piece to NightTerrors. Where that one punishes sleeping, this one rewards it. The yin to the yang.",
           language: "C#"
+        },
+        {
+          name: "ValheimKillFeed",
+          description: "An on-screen kill feed for Valheim — see what's dying, who killed it, and when.",
+          longDesc: "Adds a Quake/CS-style kill feed to Valheim so the chaos finally has receipts. Players, creatures, and the occasional self-inflicted tumble — all logged in the corner of your screen.",
+          language: "C#"
         }
       ]
     }
