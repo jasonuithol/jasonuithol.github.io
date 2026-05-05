@@ -65,6 +65,12 @@ const PORTFOLIO_DATA = {
           description: "MCP service pair for Steam platform integration.",
           longDesc: "Domain knowledge service for working with Steam APIs, Workshop, and the broader platform — for agents that need to ship games or interact with the storefront.",
           language: "Python"
+        },
+        {
+          name: "mcp-db",
+          description: "MCP service pair for database work — schemas, queries, and the surrounding tooling.",
+          longDesc: "Domain knowledge service for database work: schema design, query patterns, migration idioms. Lets the agent reason about data layers without you spelling it out every time.",
+          language: "Python"
         }
       ]
     },
