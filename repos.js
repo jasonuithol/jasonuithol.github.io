@@ -171,6 +171,22 @@ const PORTFOLIO_DATA = {
           language: "C#"
         }
       ]
+    },
+
+    {
+      id: "data-tools",
+      name: "DATA_TOOLS",
+      label: "Data Tools",
+      description: "Open-source plumbing. The kind of tool you wish existed at the day job.",
+      glyph: "⇋",
+      repos: [
+        {
+          name: "betl",
+          description: "Better ETL — a cross-platform, open-source ETL runtime aimed at replacing SSIS.",
+          longDesc: "Pipelines as plain YAML, engine in C, types from Apache Arrow, providers loaded via a stable C ABI. Inline Lua for expressions, full Lua for tasks. SSIS without the GUIDs, XML, or vendor lock-in.",
+          language: "C"
+        }
+      ]
     }
   ]
 };
