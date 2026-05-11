@@ -76,6 +76,22 @@ const PORTFOLIO_DATA = {
     },
 
     {
+      id: "data-tools",
+      name: "DATA_TOOLS",
+      label: "Data Tools",
+      description: "Open-source tools for data processing you could be using right now.",
+      glyph: "⇋",
+      repos: [
+        {
+          name: "betl",
+          description: "Better ETL — a cross-platform, open-source ETL runtime aimed at replacing SSIS.",
+          longDesc: "Pipelines as plain YAML, engine in C, types from Apache Arrow, providers loaded via a stable C ABI. Inline Lua for expressions, full Lua for tasks. SSIS without the GUIDs, XML, or vendor lock-in.",
+          language: "C"
+        }
+      ]
+    },
+
+    {
       id: "games",
       name: "GAMES",
       label: "Games",
@@ -169,22 +185,6 @@ const PORTFOLIO_DATA = {
           description: "An on-screen kill feed for Valheim — see what's dying, who killed it, and when.",
           longDesc: "Adds a Quake/CS-style kill feed to Valheim so the chaos finally has receipts. Players, creatures, and the occasional self-inflicted tumble — all logged in the corner of your screen.",
           language: "C#"
-        }
-      ]
-    },
-
-    {
-      id: "data-tools",
-      name: "DATA_TOOLS",
-      label: "Data Tools",
-      description: "Open-source plumbing. The kind of tool you wish existed at the day job.",
-      glyph: "⇋",
-      repos: [
-        {
-          name: "betl",
-          description: "Better ETL — a cross-platform, open-source ETL runtime aimed at replacing SSIS.",
-          longDesc: "Pipelines as plain YAML, engine in C, types from Apache Arrow, providers loaded via a stable C ABI. Inline Lua for expressions, full Lua for tasks. SSIS without the GUIDs, XML, or vendor lock-in.",
-          language: "C"
         }
       ]
     }
