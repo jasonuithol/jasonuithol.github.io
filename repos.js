@@ -71,6 +71,12 @@ const PORTFOLIO_DATA = {
           description: "MCP service pair for database work — schemas, queries, and the surrounding tooling.",
           longDesc: "Domain knowledge service for database work: schema design, query patterns, migration idioms. Lets the agent reason about data layers without you spelling it out every time.",
           language: "Python"
+        },
+        {
+          name: "mcp-ssis",
+          description: "Runs and benchmarks SSIS .dtsx packages over MCP. Reference oracle for the betl replacement work.",
+          longDesc: "Wraps the real SSIS-on-Linux runtime (dtexec) in a container so .dtsx packages can be validated, executed, and timed over MCP. Per-run wall/CPU/peak-RSS captured via GNU time; optional reset_sql hooks let benchmarks control cache state. Peers with mcp-db's mssql container for state resets. The engine to measure betl against.",
+          language: "Python"
         }
       ]
     },
