@@ -139,6 +139,12 @@ const PORTFOLIO_DATA = {
           description: "The sequel — same gravity, more ambition.",
           longDesc: "Iteration on spacewar with upgraded mechanics: better physics, particle effects, possibly more than two ships. Where v1 was the lab notebook, v2 is the published paper.",
           language: "Python"
+        },
+        {
+          name: "SCUM-Mods",
+          description: "Quality of life improvements for SCUM players and admins.",
+          longDesc: "Make playing on, or running, a SCUM server easier and funner.",
+          language: "C++/Lua"
         }
       ]
     },
