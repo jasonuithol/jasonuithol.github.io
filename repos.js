@@ -89,10 +89,22 @@ const PORTFOLIO_DATA = {
       glyph: "⇋",
       repos: [
         {
-          name: "betl",
-          description: "Better ETL — a cross-platform, open-source ETL runtime aimed at replacing SSIS.",
-          longDesc: "Pipelines as plain YAML, engine in C, types from Apache Arrow, providers loaded via a stable C ABI. Inline Lua for expressions, full Lua for tasks. SSIS without the GUIDs, XML, or vendor lock-in.",
+          name: "betl-native",
+          description: "Better ETL — open-source SSIS replacement. Native C/Lua reference implementation.",
+          longDesc: "Pipelines as plain YAML, engine in C, types from Apache Arrow, providers loaded via a stable C ABI. Inline Lua for expressions, full Lua for tasks. SSIS without the GUIDs, XML, or vendor lock-in. (Renamed from `betl` when the ecosystem grew a second runtime — see betl-dotnet.) Contract lives in SPEC_CORE.md so multiple engines can implement the same YAML format.",
           language: "C"
+        },
+        {
+          name: "betl-dotnet",
+          description: "Pure-.NET reimplementation of betl. Same SPEC_CORE.md contract; runs natively on Windows with no WSL or container.",
+          longDesc: "A peer reference implementation of betl in .NET 9. Wraps SSIS PipelineComponent subclasses behind a managed runtime (no native ABI / dlopen needed). Ships dotnet.task / dotnet.script / dotnet.pipelinecomponent as the inline-code escape hatch — Lua is intentionally absent. Installs as a .NET global tool: `dotnet tool install -g Betl.Dotnet`. 150+ conformance tests covering the full spec floor plus Phase 10 extensions (var.set, audit, xml.read, xlsx.*, postgres.copy/exec, mssql.bulkinsert).",
+          language: "C#"
+        },
+        {
+          name: "betl-tools",
+          description: "Cross-platform tooling for the betl ecosystem: dtsx2yaml converter, browser-based YAML viewer, container packaging.",
+          longDesc: "Three peers: betl-dtsx2yaml (SSIS .dtsx → .betl.yml migration tool, a .NET global tool), betl-yaml-ui (Python + FastAPI viewer/editor with full inspector, run-form, SQL editor — live demo at jasonuithol.github.io/betl-tools/), and the multi-stage Containerfile that bundles a betl-native runtime + tools into a single image. Decoupled from the engine repos so tooling can iterate independently.",
+          language: "Python"
         }
       ]
     },
