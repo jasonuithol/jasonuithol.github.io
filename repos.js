@@ -157,6 +157,12 @@ const PORTFOLIO_DATA = {
           description: "Quality of life improvements for SCUM players and admins.",
           longDesc: "Make playing on, or running, a SCUM server easier and funner.",
           language: "C++/Lua"
+        },
+        {
+          name: "InventoryQuest",
+          description: "Simulate having an inventory.",
+          longDesc: "Always wondered what it would be like to skip all that boring 3D geometry and just cut to the chase ? Now you can.",
+          language: "Java"
         }
       ]
     },

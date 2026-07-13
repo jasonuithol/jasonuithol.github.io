@@ -10,7 +10,7 @@
   const introLines = [
     '> initialising session...',
     '> resolving identity: jasonuithol@github',
-    '> 24 repositories detected across 4 clusters',
+    '> 28 repositories detected across 4 clusters',
     '> the matrix has you...',
     ''
   ];
