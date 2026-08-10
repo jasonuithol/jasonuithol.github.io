@@ -26,8 +26,8 @@ const PORTFOLIO_DATA = {
         },
         {
           name: "ai-agent-mcps",
-          description: "Monorepo of 11 MCP services — every domain the sandbox agents know, in one repo. Stateless per MCP 2026-07-28.",
-          longDesc: "Formerly eleven separate mcp-* repos, now consolidated with full commit history: domain workbenches for C, .NET, pygame, chess engines, DOS reverse engineering, databases, SSIS, Steam, UE4SS, and Valheim modding, plus RAG-backed knowledge services built on a shared MCP + ChromaDB scaffold. All 18 servers speak the stateless MCP 2026-07-28 protocol — no handshake, no session ids, one POST per request. The pre-migration state lives under the `stateful` tag for the nostalgic.",
+          description: "Monorepo of 10 MCP services — every domain the sandbox agents know, in one repo. Stateless per MCP 2026-07-28.",
+          longDesc: "Formerly ten separate mcp-* repos, now consolidated with full commit history: domain workbenches for C, .NET, pygame, chess engines, DOS reverse engineering, databases, SSIS, Steam, and Valheim modding, plus RAG-backed knowledge services built on a shared MCP + ChromaDB scaffold. All 18 servers speak the stateless MCP 2026-07-28 protocol — no handshake, no session ids, one POST per request. The pre-migration state lives under the `stateful` tag for the nostalgic.",
           language: "Python"
         }
       ]
