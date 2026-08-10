@@ -25,57 +25,9 @@ const PORTFOLIO_DATA = {
           language: "Shell"
         },
         {
-          name: "mcp-knowledge-base",
-          description: "Shared FastMCP + ChromaDB scaffolding for RAG-backed knowledge MCP services.",
-          longDesc: "The shared foundation that all the domain-specific MCP knowledge services build on. FastMCP plus ChromaDB plus a clean ingestion pipeline. Write once, mount anywhere.",
-          language: "Python"
-        },
-        {
-          name: "mcp-pygame",
-          description: "MCP service pair for Python/pygame development. Provider-agnostic; consumed by claude-pygame.",
-          longDesc: "A service/knowledge pair giving Claude deep context on pygame: API surface, common patterns, idioms. The agent stops guessing pygame and starts knowing it.",
-          language: "Python"
-        },
-        {
-          name: "mcp-dosre",
-          description: "MCP service pair for DOS-era binary reverse engineering. Provider-agnostic.",
-          longDesc: "Reverse-engineer DOS binaries with an agent that actually understands x86 real mode, INT 21h, and the weird shape of MZ executables. Built originally to feed UltimatePyve.",
-          language: "Python"
-        },
-        {
-          name: "mcp-valheim",
-          description: "MCP service pair for Valheim mod development (BepInEx/dotnet/Thunderstore).",
-          longDesc: "The agentic side of the Valheim modding pipeline. Knows BepInEx hooks, dotnet idioms, Thunderstore packaging, and the shape of Valheim's runtime — so building a mod becomes a conversation.",
-          language: "Python"
-        },
-        {
-          name: "mcp-c",
-          description: "MCP service pair for C development. Pointers, memory, and the joy of segfaults.",
-          longDesc: "Domain knowledge for the agent on C: idioms, undefined behavior, memory models, build systems. Companion to bchess and other low-level work.",
-          language: "Python"
-        },
-        {
-          name: "mcp-chess",
-          description: "MCP service pair for chess engine development. Companion to bchess.",
-          longDesc: "Knowledge service for chess engine work: move generation, board representation (bitboards/mailbox), search algorithms, evaluation. Built to assist the bchess project.",
-          language: "Python"
-        },
-        {
-          name: "mcp-steam",
-          description: "MCP service pair for Steam platform integration.",
-          longDesc: "Domain knowledge service for working with Steam APIs, Workshop, and the broader platform — for agents that need to ship games or interact with the storefront.",
-          language: "Python"
-        },
-        {
-          name: "mcp-db",
-          description: "MCP service pair for database work — schemas, queries, and the surrounding tooling.",
-          longDesc: "Domain knowledge service for database work: schema design, query patterns, migration idioms. Lets the agent reason about data layers without you spelling it out every time.",
-          language: "Python"
-        },
-        {
-          name: "mcp-ssis",
-          description: "Runs and benchmarks SSIS .dtsx packages over MCP. Reference oracle for the betl replacement work.",
-          longDesc: "Wraps the real SSIS-on-Linux runtime (dtexec) in a container so .dtsx packages can be validated, executed, and timed over MCP. Per-run wall/CPU/peak-RSS captured via GNU time; optional reset_sql hooks let benchmarks control cache state. Peers with mcp-db's mssql container for state resets. The engine to measure betl against.",
+          name: "ai-agent-mcps",
+          description: "Monorepo of 11 MCP services — every domain the sandbox agents know, in one repo. Stateless per MCP 2026-07-28.",
+          longDesc: "Formerly eleven separate mcp-* repos, now consolidated with full commit history: domain workbenches for C, .NET, pygame, chess engines, DOS reverse engineering, databases, SSIS, Steam, UE4SS, and Valheim modding, plus RAG-backed knowledge services built on a shared MCP + ChromaDB scaffold. All 18 servers speak the stateless MCP 2026-07-28 protocol — no handshake, no session ids, one POST per request. The pre-migration state lives under the `stateful` tag for the nostalgic.",
           language: "Python"
         }
       ]
