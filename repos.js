@@ -42,8 +42,8 @@ const PORTFOLIO_DATA = {
       repos: [
         {
           name: "trebuchet",
-          description: "An immutable-first language that compiles to C# and C++. Effects inferred, errors are values, services composed at compile time.",
-          longDesc: "A language design taken all the way to a working prototype: tree-structured syntax, three orthogonal effect flags (Nondet, Write, Suspend) inferred from bodies, Result + ? for errors with panics catchable only at supervisor points, persistent collections, and compile-time composition roots with singleton, scoped, and resource lifetimes. The C# compiler ships an interpreter, a C# backend (async ValueTask, DI host, JSON), and a C++20 backend (header-only runtime, non-atomic refcounts, coroutines on an event loop). One rule holds it together: every sample prints the same line on all three targets. Comes with the design brief, the implementation strategy with every decision's reasoning, and a bookings API with a React UI.",
+          description: "An immutable-first language. No mutation, no loops, no exceptions: values in, values out, and state as a fold over what happened.",
+          longDesc: "Trebuchet starts from one commitment and follows it everywhere: nothing mutates. Records are deeply immutable, collections are persistent, there is no for loop, and the only way state changes is a pure fold over events. The rest of the language exists to keep that honest. Three inferred effect flags (Nondet, Write, Suspend) say exactly which functions read or change the world; errors are values with a ? operator; services are immutable and composed at compile time; the single mutable primitive, Cell, is fenced by the effect system. The prototype compiles the same source to C# and to C++20 and checks every sample against a reference interpreter on both. Comes with the design brief and a strategy document that records the reasoning behind every decision.",
           language: "C#"
         },
         {
