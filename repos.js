@@ -34,12 +34,18 @@ const PORTFOLIO_DATA = {
     },
 
     {
-      id: "data-tools",
-      name: "DATA_TOOLS",
-      label: "Data Tools",
-      description: "Open-source tools for data processing you could be using right now.",
+      id: "data-and-lang",
+      name: "DATA_AND_LANG",
+      label: "Data and Lang",
+      description: "Open-source tools for data processing you could be using right now, and a language to write the next ones in.",
       glyph: "⇋",
       repos: [
+        {
+          name: "trebuchet",
+          description: "An immutable-first language that compiles to C# and C++. Effects inferred, errors are values, services composed at compile time.",
+          longDesc: "A language design taken all the way to a working prototype: tree-structured syntax, three orthogonal effect flags (Nondet, Write, Suspend) inferred from bodies, Result + ? for errors with panics catchable only at supervisor points, persistent collections, and compile-time composition roots with singleton, scoped, and resource lifetimes. The C# compiler ships an interpreter, a C# backend (async ValueTask, DI host, JSON), and a C++20 backend (header-only runtime, non-atomic refcounts, coroutines on an event loop). One rule holds it together: every sample prints the same line on all three targets. Comes with the design brief, the implementation strategy with every decision's reasoning, and a bookings API with a React UI.",
+          language: "C#"
+        },
         {
           name: "betl-native",
           description: "Better ETL — open-source SSIS replacement. Native C/Lua reference implementation.",
