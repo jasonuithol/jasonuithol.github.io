@@ -196,7 +196,8 @@
   const dossierTitle = document.getElementById('dossier-title');
 
   function openDossier(repo) {
-    const githubUrl = `https://github.com/${data.identity.handle}/${repo.name}`;
+    // a repo may live inside another repository or point at a release: an explicit url wins
+    const githubUrl = repo.url || `https://github.com/${data.identity.handle}/${repo.name}`;
     dossierTitle.querySelector('.dossier-title-name').textContent = `${repo.name} — `;
 
     dossierBody.innerHTML = `

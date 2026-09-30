@@ -133,6 +133,13 @@ const PORTFOLIO_DATA = {
       glyph: "ᚱ",
       repos: [
         {
+          name: "valslöngva",
+          url: "https://github.com/jasonuithol/trebuchet/releases/tag/valslongva-v0.1.0",
+          description: "A Valheim mod manager: BepInEx, Thunderstore, one-click installs, play modded or vanilla. Written in Trebuchet.",
+          longDesc: "Old Norse for a sling, and the flagship application of the Trebuchet language. It finds your game through Steam, installs BepInEx, browses Thunderstore's twelve thousand packages, and installs a mod and everything it depends on with one click, one folder per package. It adopts mods that were already in the game folder, reports loose plugins by their BepInPlugin attribute without guessing, backs up anything it replaces, and starts Valheim modded or vanilla once Steam is signed in. Windows and Linux, one self-contained executable each, and the executable is its own installer. The domain is pure Trebuchet with property tests on every module and end-to-end scenarios composed from in-memory fakes; the only C# is a static class behind the externs and the ASP.NET process that serves the browser UI.",
+          language: "Trebuchet"
+        },
+        {
           name: "AdminHelpDesk",
           description: "Adds commands that help admins run servers a bit easier.",
           longDesc: "An admin's toolbelt for Valheim server hosts. Whatever the vanilla console doesn't give you, this fills in.",
