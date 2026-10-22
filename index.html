@@ -3,117 +3,50 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>jasonuithol :: easyCoder</title>
-<meta name="description" content="The attic. A portfolio of repositories by jasonuithol — agentic AI, data tools and languages, games, and Valheim mods." />
+<title>Jason Uithol — Career</title>
+<meta name="description" content="Jason Uithol: full stack developer. Career history across .NET, SQL, security, APIs and frontend, filterable by skill." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="career.css" />
 </head>
 <body>
 
-<!-- code rain canvas (behind everything) -->
-<canvas id="matrix-canvas"></canvas>
-
-<!-- ============================================================
-     LOAD GATE — forces a click so audio is allowed to play
-     ============================================================ -->
-<div id="load-gate">
-  <button id="load-program" type="button">[ LOAD PROGRAM ]</button>
+<div class="gate" id="gate">
+  <button class="power" id="power" type="button" aria-label="Power on">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8"/><path d="M6.4 6.9a8 8 0 1 0 11.2 0"/></svg>
+  </button>
+  <p class="silk">Power on</p>
 </div>
 
-<!-- ============================================================
-     INTRO SEQUENCE
-     ============================================================ -->
-<div id="intro">
-  <div class="intro-terminal" id="intro-terminal"></div>
-  <div class="pill-choice" id="pill-choice">
-    <button class="pill pill-red" id="pill-red" aria-label="red pill">
-      <svg class="pill-svg" viewBox="0 0 100 100" aria-hidden="true">
-        <g transform="rotate(-45 50 50)">
-          <path d="M50 35 L25 35 A15 15 0 0 0 25 65 L50 65 Z" fill="currentColor"/>
-          <path d="M25 35 L75 35 A15 15 0 0 1 75 65 L25 65 A15 15 0 0 1 25 35 Z" fill="none" stroke="currentColor" stroke-width="4"/>
-        </g>
-      </svg>
-    </button>
-    <button class="pill pill-blue" id="pill-blue" aria-label="blue pill">
-      <svg class="pill-svg" viewBox="0 0 100 100" aria-hidden="true">
-        <g transform="rotate(-135 50 50)">
-          <path d="M50 35 L25 35 A15 15 0 0 0 25 65 L50 65 Z" fill="currentColor"/>
-          <path d="M25 35 L75 35 A15 15 0 0 1 75 65 L25 65 A15 15 0 0 1 25 35 Z" fill="none" stroke="currentColor" stroke-width="4"/>
-        </g>
-      </svg>
-    </button>
+<main class="board" id="board">
+  <div class="board-inner">
+
+    <header class="hdr">
+      <h1 id="name"></h1>
+      <p class="loc silk" id="location"></p>
+      <div class="summary" id="summary"></div>
+      <nav class="links">
+        <a class="silk-btn" href="https://github.com/jasonuithol">GitHub</a>
+        <a class="silk-btn" id="seek-link" href="https://au.seek.com/profiles/jason-uithol-wcqclsrjh8">SEEK profile</a>
+      </nav>
+    </header>
+
+    <section class="bay" aria-label="Skill filters">
+      <p class="silk silk-small bay-label">Select a chip to trace that skill through the history</p>
+      <div class="chips" id="chips"></div>
+      <svg class="fanout" id="fanout" aria-hidden="true"></svg>
+    </section>
+
+    <section class="history" id="history" aria-live="polite"></section>
+
+    <section class="extras" id="extras"></section>
+
+    <footer class="foot silk silk-small" id="foot"></footer>
   </div>
-  <button class="skip-intro" id="skip-intro">[ take the blue pill ]</button>
-</div>
-
-<!-- ============================================================
-     MAIN PORTFOLIO
-     ============================================================ -->
-<main id="portfolio">
-
-  <header class="site-header">
-    <h1 class="site-title">
-      easyCoder<span class="underscore-cursor">_</span><span class="t-blue title-flowers"><span style="color:#9ec59a">✿</span><span style="color:#e89aa0">✿</span><span style="color:#e8c878">✿</span><span style="color:#8ec0d8">✿</span><span style="color:#c0a0d8">✿</span></span>
-    </h1>
-    <p class="site-subtitle">
-      <span class="t-red"><span class="prompt">$</span> whoami → <span class="site-handle">jasonuithol</span></span>
-      <span class="t-blue">nurtured and supervised by <span class="site-handle">jasonuithol</span></span>
-    </p>
-    <div class="site-meta">
-      <span>
-        <span class="t-red" id="site-tagline">welcome to the attic</span>
-        <span class="t-blue">you've wandered into the unlimited productivity grove</span>
-      </span>
-      <span><a id="site-github-link" href="#" target="_blank" rel="noopener">github.com</a></span>
-    </div>
-  </header>
-
-  <div id="clusters"></div>
-
-  <footer class="site-footer">
-    <span>
-      <span class="t-red">© <span id="year"></span> jasonuithol — every line returned to the Source.</span>
-      <span class="t-blue">© <span id="year-blue"></span> jasonuithol — every line consciously manifested.</span>
-    </span>
-    <span class="footer-right">
-      <span class="hint t-red">try: ↑↑↓↓←→←→ba · type "whoami"</span>
-      <span class="hint t-blue">psst — try ↑↑↓↓←→←→ba, or whisper "whoami"</span>
-      <button id="mode-swap" class="mode-swap">
-        <canvas class="mode-swap-rain" aria-hidden="true"></canvas>
-        <span class="t-red">Retreat to the garden</span>
-        <span class="t-blue">Enter the matrix</span>
-      </button>
-    </span>
-  </footer>
-
 </main>
 
-<!-- ============================================================
-     DOSSIER MODAL
-     ============================================================ -->
-<div id="dossier" role="dialog" aria-modal="true" aria-labelledby="dossier-title">
-  <div class="dossier-panel">
-    <div class="dossier-titlebar">
-      <span class="dossier-titlebar-left" id="dossier-title"><span class="dossier-title-name"></span><span class="t-red">DOSSIER.dat</span><span class="t-blue">field notes</span></span>
-      <button class="dossier-close" id="dossier-close" aria-label="close">×</button>
-    </div>
-    <div class="dossier-body" id="dossier-body"></div>
-  </div>
-</div>
-
-<!-- easter-egg overlay -->
-<div id="kungfu-overlay">I know kung fu.</div>
-
-<!-- scripts -->
-<script>
-  const _y = new Date().getFullYear();
-  document.getElementById('year').textContent = _y;
-  document.getElementById('year-blue').textContent = _y;
-</script>
-<script src="repos.js"></script>
-<script src="matrix.js"></script>
-<script src="portfolio.js"></script>
-
+<script src="circuit-audio.js"></script>
+<script src="career.js"></script>
 </body>
 </html>

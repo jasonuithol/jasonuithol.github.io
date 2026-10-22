@@ -1,99 +1,35 @@
-# easyCoder — portfolio showcase
+# jasonuithol.github.io — career board
 
-[CLICK HERE FOR PORTFOLIO](https://jasonuithol.github.io/)
+[jasonuithol.github.io](https://jasonuithol.github.io/)
 
-A matrix-themed single-page portfolio for the [`jasonuithol`](https://github.com/jasonuithol) GitHub account. Pure HTML/CSS/JS, zero build step, drops straight onto GitHub Pages.
+My career history as a circuit board. Power it on, watch the intro type itself out, then select a skill chip (.NET, SQL, Security, API, Frontend, AI, Python, Cloud) to light its trace through every role that used it; the rest drop out. Pure HTML/CSS/JS, no build step, served straight from GitHub Pages.
 
----
+The previous Matrix-themed repo portfolio lives at the `original` tag.
 
 ## Files
 
-| file           | purpose                                                        |
-| -------------- | -------------------------------------------------------------- |
-| `index.html`   | page structure — intro, portfolio shell, dossier modal         |
-| `styles.css`   | full theme — colors, fonts, animations, scanlines, glitch FX   |
-| `matrix.js`    | code-rain canvas + glitch-text utility                         |
-| `portfolio.js` | intro sequence, rendering, dossier modal, easter eggs          |
-| `repos.js`     | the data — your repos, descriptions, image-generation prompts  |
+| file                     | purpose                                              |
+| ------------------------ | ---------------------------------------------------- |
+| `index.html`             | page shell                                           |
+| `career.css`             | the board, chips, traces, cards                      |
+| `career.js`              | rendering, filtering, chip behaviour                 |
+| `circuit-audio.js`       | synthesised chip sounds (Web Audio)                  |
+| `data/seek-career.json`  | career data scraped from SEEK                        |
+| `data/tags.json`         | which filters each role belongs to                   |
+| `tools/seek-career.js`   | the SEEK scraper (browser console snippet)           |
 
----
+## Updating the career data
 
-## Deploy to GitHub Pages
-
-Push these files to a repo named `jasonuithol.github.io` (the special user-site repo) on the `main` branch:
-
-```bash
-# in this folder
-git init
-git add .
-git commit -m "initial portfolio"
-git branch -M main
-git remote add origin https://github.com/jasonuithol/jasonuithol.github.io.git
-git push -u origin main
-```
-
-Then in repo Settings → Pages → set source to `main` / `/ (root)`. Site goes live at `https://jasonuithol.github.io` within a minute or two.
-
-If you'd rather host it under a project subpath (e.g. `jasonuithol.github.io/portfolio/`), use any other repo name and it works the same way.
-
----
-
-## Editing the data
-
-All repo data lives in **`repos.js`**. Each repo entry looks like:
-
-```js
-{
-  name: "repo-name",
-  description: "Short one-liner shown on the card.",
-  longDesc: "Longer description shown in the dossier modal when clicked.",
-  language: "Python"
-}
-```
-
-A few entries had no description on GitHub — I made best guesses based on context (UltimatePyve, DarkAgesAI, the spacewar repos, mcp-chess, mcp-c, mcp-steam, UnifiedControlPanel). **Edit those freely**.
-
-To add or remove repos, edit the `clusters` array. Categories and order are entirely yours to control.
-
----
-
-## Two themes
-
-The intro screen offers a red pill / blue pill choice that picks the visual mode:
-
-- **Red pill — full matrix.** Code rain, scanlines, terminal cards, glitch FX. The whole 1999 fantasy.
-- **Blue pill — fake-hippy pastel.** Cream paper background, sage and terracotta, handwritten Caveat headers, Fraunces serif, soft watercolor blobs drifting. The Notion-template makeover of the same content.
-
-The footer has a `[ swap pill ]` toggle to flip between modes at any time without refreshing.
-
----
-
-## Theatrics included (because: maximum theatrics)
-
-- **Intro sequence** — typed boot text, cursor blink, red/blue pill choice with skip option
-- **Code rain background** — canvas-driven katakana glyph rain, brighter "head" glyphs at random
-- **Scanline overlay + vignette** — global CRT atmosphere
-- **Glitch-name reveal** — repo names shuffle through random characters on hover
-- **Terminal-window cards** — title bar, status dot, hover glow
-- **Idle accelerator** — code rain speeds up if you stop interacting for 30 seconds
-- **Konami code** — `↑↑↓↓←→←→ba` triggers "I know kung fu"
-- **Whoami easter egg** — type `whoami` anywhere on the page
-
----
+1. Open the SEEK profile while logged in (the full history isn't public).
+2. Paste `tools/seek-career.js` into the devtools console. The JSON is copied to the clipboard.
+3. Save it over `data/seek-career.json`.
+4. Add any new roles to `data/tags.json`, keyed `"<start> <company>"`, e.g. `"2022-06 Department of Education QLD": ["net", "sql"]`.
 
 ## Local preview
 
-Just open `index.html` in a browser. No server required.
-
-Or, if you prefer (and to make sure relative paths behave the same as on Pages):
+The page fetches its JSON, so serve it over HTTP:
 
 ```bash
-python3 -m http.server 8000
-# then visit http://localhost:8000
+python3 -m http.server 8123
+# then visit http://localhost:8123
 ```
-
----
-
-## License / use
-
-Yours to do whatever you want with.
