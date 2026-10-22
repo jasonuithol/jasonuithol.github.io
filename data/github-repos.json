@@ -1,0 +1,563 @@
+{
+  "source": "https://github.com/jasonuithol",
+  "scrapedAt": "2026-10-22T23:20:51+00:00",
+  "repos": [
+    {
+      "name": "AdminHelpDesk",
+      "url": "https://github.com/jasonuithol/AdminHelpDesk",
+      "description": "Adds commands to valheim that help admins run servers a bit easier.",
+      "topics": [],
+      "languages": {
+        "C#": 25804
+      },
+      "firstCommit": "2026-04-16T05:59:43Z",
+      "lastCommit": "2026-06-12T05:58:48Z",
+      "commits": 3
+    },
+    {
+      "name": "ai-agent-mcps",
+      "url": "https://github.com/jasonuithol/ai-agent-mcps",
+      "description": "Monorepo of MCP services (consolidated from mcp-* repos)",
+      "topics": [],
+      "languages": {
+        "Python": 471186,
+        "Shell": 100635,
+        "Dockerfile": 25357
+      },
+      "firstCommit": "2026-04-25T01:18:38Z",
+      "lastCommit": "2026-08-10T23:50:21Z",
+      "commits": 84
+    },
+    {
+      "name": "AutoHeim",
+      "url": "https://github.com/jasonuithol/AutoHeim",
+      "description": "Automate the Valheim client from Claude Code: BepInEx plugin with a localhost JSON API plus a launcher CLI",
+      "topics": [],
+      "languages": {
+        "C#": 168180,
+        "Python": 24600,
+        "Shell": 6213,
+        "Batchfile": 163
+      },
+      "firstCommit": "2026-10-21T09:47:28Z",
+      "lastCommit": "2026-10-21T13:37:04Z",
+      "commits": 7
+    },
+    {
+      "name": "Battlestar",
+      "url": "https://github.com/jasonuithol/Battlestar",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 47810
+      },
+      "firstCommit": "2025-11-13T02:40:13Z",
+      "lastCommit": "2025-11-18T06:06:39Z",
+      "commits": 10
+    },
+    {
+      "name": "bchess",
+      "url": "https://github.com/jasonuithol/bchess",
+      "description": "A terminal based chess engine written in C",
+      "topics": [],
+      "languages": {
+        "C": 150121,
+        "Shell": 8965
+      },
+      "firstCommit": "2016-02-18T09:39:06Z",
+      "lastCommit": "2026-06-12T05:59:03Z",
+      "commits": 137
+    },
+    {
+      "name": "betl-dotnet",
+      "url": "https://github.com/jasonuithol/betl-dotnet",
+      "description": "Pure .NET 9 port of betl — YAML-driven ETL with SSIS expression engine, Arrow IPC, parallel queues, and dotnet.* user-code escape hatches.",
+      "topics": [
+        "apache-arrow",
+        "dotnet",
+        "etl",
+        "ssis"
+      ],
+      "languages": {
+        "C#": 447690
+      },
+      "firstCommit": "2026-05-17T02:26:00Z",
+      "lastCommit": "2026-05-22T09:35:04Z",
+      "commits": 36
+    },
+    {
+      "name": "betl-native",
+      "url": "https://github.com/jasonuithol/betl-native",
+      "description": "Better ETL - an open source ETL tool",
+      "topics": [],
+      "languages": {
+        "C": 2255575,
+        "C#": 98888,
+        "CMake": 67900,
+        "Shell": 35682,
+        "Python": 22594,
+        "TSQL": 3362
+      },
+      "firstCommit": "2026-05-09T14:41:20Z",
+      "lastCommit": "2026-05-22T09:34:57Z",
+      "commits": 143
+    },
+    {
+      "name": "betl-tools",
+      "url": "https://github.com/jasonuithol/betl-tools",
+      "description": "Cross-platform tools for the betl ecosystem: dtsx2yaml, yaml-ui, container packaging.",
+      "topics": [],
+      "languages": {
+        "C#": 191336,
+        "HTML": 105704,
+        "Python": 13929,
+        "Dockerfile": 7964,
+        "Shell": 7800,
+        "CMake": 2139,
+        "PowerShell": 1355
+      },
+      "firstCommit": "2026-05-16T10:12:29Z",
+      "lastCommit": "2026-05-22T09:35:11Z",
+      "commits": 37
+    },
+    {
+      "name": "Bretaheim",
+      "url": "https://github.com/jasonuithol/Bretaheim",
+      "description": "Design documents for rebuilding Ultima V inside Valheim (BepInEx/Jötunn mod)",
+      "topics": [],
+      "languages": {
+        "C#": 2055922,
+        "Python": 7789,
+        "Shell": 3198,
+        "Rust": 1304
+      },
+      "firstCommit": "2026-10-16T02:53:39Z",
+      "lastCommit": "2026-10-22T10:54:18Z",
+      "commits": 194
+    },
+    {
+      "name": "claude-sandbox-core",
+      "url": "https://github.com/jasonuithol/claude-sandbox-core",
+      "description": "Data-driven Claude Code sandbox scaffold. Domain confs configure MCP services, mounts, env.",
+      "topics": [],
+      "languages": {
+        "Shell": 11015,
+        "Dockerfile": 810
+      },
+      "firstCommit": "2026-04-27T01:45:04Z",
+      "lastCommit": "2026-08-10T23:50:46Z",
+      "commits": 15
+    },
+    {
+      "name": "DarkAgesAI",
+      "url": "https://github.com/jasonuithol/DarkAgesAI",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 40857,
+        "HTML": 1817,
+        "Batchfile": 1562,
+        "CSS": 1021,
+        "JavaScript": 246
+      },
+      "firstCommit": "2025-07-26T23:44:54Z",
+      "lastCommit": "2025-08-24T07:33:18Z",
+      "commits": 28
+    },
+    {
+      "name": "DayNightRobust",
+      "url": "https://github.com/jasonuithol/DayNightRobust",
+      "description": "Valheim mod: Ezvay's DayNight, but it doesn't break on every point release of Valheim.",
+      "topics": [],
+      "languages": {
+        "C#": 51982,
+        "Shell": 1466
+      },
+      "firstCommit": "2026-09-18T13:08:54Z",
+      "lastCommit": "2026-09-18T13:08:54Z",
+      "commits": 1
+    },
+    {
+      "name": "dayz-map-chat",
+      "url": "https://github.com/jasonuithol/dayz-map-chat",
+      "description": "Talk to your Dayz map !",
+      "topics": [],
+      "languages": {
+        "HTML": 14626,
+        "JavaScript": 511
+      },
+      "firstCommit": "2026-02-28T00:56:06Z",
+      "lastCommit": "2026-02-28T03:11:52Z",
+      "commits": 3
+    },
+    {
+      "name": "DayZ3dMap",
+      "url": "https://github.com/jasonuithol/DayZ3dMap",
+      "description": "Futuristic 3D wireframe map of DayZ's Chernarus and Livonia, built from your own game files (Python extractors + three.js viewer)",
+      "topics": [],
+      "languages": {
+        "JavaScript": 1361744,
+        "Python": 59873,
+        "HTML": 4381
+      },
+      "firstCommit": "2026-09-09T06:57:16Z",
+      "lastCommit": "2026-09-09T07:43:04Z",
+      "commits": 5
+    },
+    {
+      "name": "DayZMissions",
+      "url": "https://github.com/jasonuithol/DayZMissions",
+      "description": "Scripted vanilla missions for DayZ dedicated servers, with Linux deploy/run/test tooling",
+      "topics": [],
+      "languages": {
+        "C": 82405,
+        "Shell": 29348,
+        "Python": 18820,
+        "C++": 1628
+      },
+      "firstCommit": "2026-09-21T06:41:54Z",
+      "lastCommit": "2026-09-29T03:19:57Z",
+      "commits": 52
+    },
+    {
+      "name": "DiscordLogSync",
+      "url": "https://github.com/jasonuithol/DiscordLogSync",
+      "description": "Sync valheim server logs with a discord chat channe;",
+      "topics": [],
+      "languages": {
+        "C#": 35260,
+        "Shell": 865
+      },
+      "firstCommit": "2026-03-27T06:09:32Z",
+      "lastCommit": "2026-06-12T05:58:51Z",
+      "commits": 9
+    },
+    {
+      "name": "DjangoMQDemo",
+      "url": "https://github.com/jasonuithol/DjangoMQDemo",
+      "description": "Containerized Django + DRF + Celery/RabbitMQ demo (podman-compose) with a hands-on React UI",
+      "topics": [
+        "celery",
+        "django",
+        "django-rest-framework",
+        "podman",
+        "postgresql",
+        "pytest",
+        "python",
+        "rabbitmq",
+        "react",
+        "redis",
+        "uv"
+      ],
+      "languages": {
+        "Python": 28312,
+        "HTML": 9334,
+        "Makefile": 2134,
+        "Dockerfile": 1149
+      },
+      "firstCommit": "2026-07-11T11:39:59Z",
+      "lastCommit": "2026-07-12T00:17:31Z",
+      "commits": 13
+    },
+    {
+      "name": "DualBoot",
+      "url": "https://github.com/jasonuithol/DualBoot",
+      "description": null,
+      "topics": [],
+      "languages": {},
+      "firstCommit": "2025-12-16T09:31:53Z",
+      "lastCommit": "2025-12-17T22:03:27Z",
+      "commits": 3
+    },
+    {
+      "name": "EepeyDeepey",
+      "url": "https://github.com/jasonuithol/EepeyDeepey",
+      "description": "A valheim mod for encouraging a good night's sleep",
+      "topics": [],
+      "languages": {
+        "C#": 15886,
+        "Shell": 1593
+      },
+      "firstCommit": "2026-03-23T05:27:10Z",
+      "lastCommit": "2026-05-07T08:31:35Z",
+      "commits": 5
+    },
+    {
+      "name": "InventoryQuest",
+      "url": "https://github.com/jasonuithol/InventoryQuest",
+      "description": "⚔️ Server-authoritative multiplayer inventory-Tetris climb-the-mountain game — Java 21, Spring Boot 3.5, Thymeleaf + htmx, PostgreSQL.",
+      "topics": [],
+      "languages": {
+        "Java": 244685,
+        "HTML": 19977,
+        "Shell": 12144,
+        "CSS": 7483,
+        "Dockerfile": 1367
+      },
+      "firstCommit": "2026-07-12T07:30:35Z",
+      "lastCommit": "2026-07-14T05:19:58Z",
+      "commits": 34
+    },
+    {
+      "name": "Lockscreen",
+      "url": "https://github.com/jasonuithol/Lockscreen",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "JavaScript": 6650,
+        "Shell": 423,
+        "Batchfile": 113
+      },
+      "firstCommit": "2026-01-31T03:49:20Z",
+      "lastCommit": "2026-02-02T02:10:55Z",
+      "commits": 2
+    },
+    {
+      "name": "MPServerTOD",
+      "url": "https://github.com/jasonuithol/MPServerTOD",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 20231,
+        "Batchfile": 50
+      },
+      "firstCommit": "2025-12-12T04:16:26Z",
+      "lastCommit": "2025-12-21T02:22:18Z",
+      "commits": 3
+    },
+    {
+      "name": "NetworkRelay",
+      "url": "https://github.com/jasonuithol/NetworkRelay",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 86424,
+        "Shell": 14832,
+        "PLpgSQL": 5544
+      },
+      "firstCommit": "2025-12-15T10:12:23Z",
+      "lastCommit": "2025-12-15T10:12:23Z",
+      "commits": 1
+    },
+    {
+      "name": "NightTerrors",
+      "url": "https://github.com/jasonuithol/NightTerrors",
+      "description": "Valheim mod that gives a chance for something terrible to happen when sleeping.",
+      "topics": [],
+      "languages": {
+        "C#": 30954
+      },
+      "firstCommit": "2026-04-10T03:55:27Z",
+      "lastCommit": "2026-06-12T05:58:54Z",
+      "commits": 5
+    },
+    {
+      "name": "SCUM-Mods",
+      "url": "https://github.com/jasonuithol/SCUM-Mods",
+      "description": "A repo for SCUM mods",
+      "topics": [],
+      "languages": {
+        "Lua": 275803,
+        "JavaScript": 62276,
+        "Python": 39958,
+        "C++": 22931,
+        "Shell": 15120,
+        "PowerShell": 559
+      },
+      "firstCommit": "2026-05-25T04:45:44Z",
+      "lastCommit": "2026-07-18T05:39:48Z",
+      "commits": 93
+    },
+    {
+      "name": "ServerBrowser",
+      "url": "https://github.com/jasonuithol/ServerBrowser",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "HTML": 17083,
+        "Python": 13388,
+        "Batchfile": 89
+      },
+      "firstCommit": "2025-12-07T23:52:41Z",
+      "lastCommit": "2025-12-08T00:49:16Z",
+      "commits": 4
+    },
+    {
+      "name": "SetupLinuxDev",
+      "url": "https://github.com/jasonuithol/SetupLinuxDev",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Shell": 6085
+      },
+      "firstCommit": "2025-12-16T22:46:45Z",
+      "lastCommit": "2025-12-17T11:45:32Z",
+      "commits": 3
+    },
+    {
+      "name": "spacewar",
+      "url": "https://github.com/jasonuithol/spacewar",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 27818
+      },
+      "firstCommit": "2022-12-28T00:12:31Z",
+      "lastCommit": "2022-12-30T12:07:05Z",
+      "commits": 9
+    },
+    {
+      "name": "SpaceWar2",
+      "url": "https://github.com/jasonuithol/SpaceWar2",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 44112,
+        "GLSL": 2125,
+        "Batchfile": 138
+      },
+      "firstCommit": "2025-12-13T04:03:53Z",
+      "lastCommit": "2025-12-14T08:37:24Z",
+      "commits": 9
+    },
+    {
+      "name": "StableDiffClientMinimal",
+      "url": "https://github.com/jasonuithol/StableDiffClientMinimal",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 18310
+      },
+      "firstCommit": "2025-08-17T01:11:59Z",
+      "lastCommit": "2025-08-24T08:46:27Z",
+      "commits": 25
+    },
+    {
+      "name": "stupidcodetricks",
+      "url": "https://github.com/jasonuithol/stupidcodetricks",
+      "description": "A shed in the backyard for storing dumb things I've made that have no practical use whatsoever",
+      "topics": [],
+      "languages": {
+        "Python": 3322
+      },
+      "firstCommit": "2022-07-05T02:18:11Z",
+      "lastCommit": "2022-07-05T02:24:28Z",
+      "commits": 3
+    },
+    {
+      "name": "TranslinkRealtimeApp",
+      "url": "https://github.com/jasonuithol/TranslinkRealtimeApp",
+      "description": "Realtime 'next service arriving' departures board for Translink South East Queensland — buses, trains, ferries and trams.",
+      "topics": [],
+      "languages": {
+        "JavaScript": 413822,
+        "Python": 246099,
+        "CSS": 114602,
+        "Shell": 88843,
+        "TypeScript": 87695,
+        "HTML": 38197,
+        "Swift": 3031,
+        "Dockerfile": 2855,
+        "Java": 1299,
+        "Ruby": 622
+      },
+      "firstCommit": "2026-07-20T22:35:10Z",
+      "lastCommit": "2026-08-13T04:42:11Z",
+      "commits": 306
+    },
+    {
+      "name": "trebuchet",
+      "url": "https://github.com/jasonuithol/trebuchet",
+      "description": "An immutable-first language that compiles to C# and C++: inferred effects, event folds, compile-time composition roots",
+      "topics": [],
+      "languages": {
+        "C#": 653991,
+        "C++": 66769,
+        "HTML": 44186,
+        "Shell": 858
+      },
+      "firstCommit": "2026-09-08T09:50:49Z",
+      "lastCommit": "2026-10-22T12:50:01Z",
+      "commits": 57
+    },
+    {
+      "name": "TuckMyChooksIn",
+      "url": "https://github.com/jasonuithol/TuckMyChooksIn",
+      "description": "A valheim mod that let's you build beds for your chooks so they can sleep when you do.",
+      "topics": [],
+      "languages": {
+        "C#": 22490
+      },
+      "firstCommit": "2026-04-15T02:08:03Z",
+      "lastCommit": "2026-06-12T05:59:00Z",
+      "commits": 3
+    },
+    {
+      "name": "Ultima5Revolutions",
+      "url": "https://github.com/jasonuithol/Ultima5Revolutions",
+      "description": "Ultima V (DOS, 1988) decompiled to Rust — engine reimplementation, requires the original game files",
+      "topics": [],
+      "languages": {
+        "Rust": 1572156,
+        "Python": 22705,
+        "Java": 15528,
+        "Shell": 1772
+      },
+      "firstCommit": "2026-10-15T00:43:21Z",
+      "lastCommit": "2026-10-15T02:34:08Z",
+      "commits": 3
+    },
+    {
+      "name": "UltimatePyve",
+      "url": "https://github.com/jasonuithol/UltimatePyve",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 716912,
+        "Shell": 1292,
+        "Batchfile": 1002
+      },
+      "firstCommit": "2025-08-24T09:52:42Z",
+      "lastCommit": "2026-10-16T12:12:41Z",
+      "commits": 315
+    },
+    {
+      "name": "UnifiedControlPanel",
+      "url": "https://github.com/jasonuithol/UnifiedControlPanel",
+      "description": null,
+      "topics": [],
+      "languages": {
+        "Python": 41032,
+        "Batchfile": 74
+      },
+      "firstCommit": "2025-12-11T06:18:59Z",
+      "lastCommit": "2025-12-13T00:02:53Z",
+      "commits": 9
+    },
+    {
+      "name": "ValheimKillFeed",
+      "url": "https://github.com/jasonuithol/ValheimKillFeed",
+      "description": "Server-aware kill feed mod for Valheim with random flavor phrasings.",
+      "topics": [],
+      "languages": {
+        "C#": 18761
+      },
+      "firstCommit": "2026-05-04T01:53:44Z",
+      "lastCommit": "2026-05-04T01:53:44Z",
+      "commits": 1
+    },
+    {
+      "name": "ValheimScheduledMessages",
+      "url": "https://github.com/jasonuithol/ValheimScheduledMessages",
+      "description": "Scheduled Messages mod for Valheim - packaged for Thunderstore.",
+      "topics": [],
+      "languages": {
+        "C#": 8757,
+        "Shell": 768
+      },
+      "firstCommit": "2026-03-16T03:50:57Z",
+      "lastCommit": "2026-06-12T05:58:57Z",
+      "commits": 8
+    }
+  ]
+}

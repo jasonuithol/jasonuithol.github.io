@@ -119,7 +119,33 @@ const CircuitAudio = (() => {
               peak: space ? 0.16 : 0.08, decay: 0.025 });
   }
 
+  // Liquid being sucked through a straw: a resonant noise band sweeping down
+  // under a falling whistle, then a pop as it lands in the button.
+  // Reversed (the intro spilling back out), the sweeps rise and the pop leads.
+  function slurp(t, reverse) {
+    const dur = 0.6;
+    const [hi, lo] = [2600, 260];
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const f = ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = 5;
+    f.frequency.setValueAtTime(reverse ? lo : hi, t);
+    f.frequency.exponentialRampToValueAtTime(reverse ? hi : lo, t + dur);
+    const g = ctx.createGain();
+    envelope(g, t, 0.45, 0.08, dur - 0.08);
+    src.connect(f).connect(g).connect(out);
+    src.start(t, Math.random() * 0.3);
+    src.stop(t + dur + 0.05);
+    tone(t, { from: reverse ? 140 : 700, to: reverse ? 700 : 140, peak: 0.06, attack: 0.05, decay: dur - 0.05 });
+    tone(reverse ? t : t + dur, { from: 1100, to: 1700, peak: 0.12, decay: 0.06 });
+  }
+
   return {
+    slurp(reverse = false) {
+      if (!ctx) return;
+      slurp(ctx.currentTime, reverse);
+    },
     // The power button: unlocks audio and plays the activation sweep.
     boot() {
       init();

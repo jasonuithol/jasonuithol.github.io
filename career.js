@@ -1,9 +1,10 @@
-// Career board: renders data/seek-career.json, filtered by the chips.
+// Career board: renders the SEEK career history and the GitHub repos side by
+// side, both filtered by the chips.
 //
 // Layout: each chip sits over a socket; the fanout SVG routes one trace per
-// socket down into a bus of five vertical lanes in the left gutter. Every role
-// row carries its own segment of those lanes (so hiding a row keeps the bus
-// continuous) plus a stub from each matching lane to the card.
+// socket into a bus of vertical lanes running down between the two columns
+// (down the left on narrow screens). Every card has a stub from each matching
+// lane to its edge; stubs are fixed-length CSS, so no layout measuring.
 //
 // Lighting is pure CSS: the board gets `on-<tag>` classes and every trace
 // element tagged `t-<tag>` lights in that tag's colour.
@@ -27,12 +28,16 @@
   const LIFT_DELAY_MS = 110;
 
   const board = document.getElementById('board');
-  const history = document.getElementById('history');
+  const work = document.getElementById('work');
   const fanout = document.getElementById('fanout');
 
   const on = new Set();
   const pending = new Map();
-  let rows = [];
+  // One per column: its rows, and the noun for its status line.
+  const cols = [
+    { key: 'career', title: 'Career', noun: 'role', rows: [] },
+    { key: 'repos',  title: 'GitHub', noun: 'repo', rows: [] },
+  ];
 
   // ---------- helpers ----------
 
@@ -81,11 +86,6 @@
 
   const tagVar = (id, i) => `--i:${i};--c:var(--c-${id})`;
 
-  // Five lane segments for one row of the bus.
-  function lanes() {
-    return TAGS.map((t, i) =>
-      `<span class="lane trace t-${t.id}" style="${tagVar(t.id, i)}"></span>`).join('');
-  }
 
   // SEEK achievements are free text. Usually: a comma-separated tech line,
   // then paragraphs and bullet lines (•, *, -).
@@ -154,10 +154,8 @@
       chip.addEventListener('click', () => userToggle(chip)));
   }
 
-  function renderRow(job, tags) {
-    const { stack, blocks } = parseAchievements(job.achievements);
-    const body = blocks.length ? `<div class="body">${renderBlocks(blocks)}</div>` : '';
-
+  // A card in either column. Stubs and vias run from its edge to the lanes.
+  function renderRow({ title, href, sub, when, length, stack, tags, body }) {
     const stubs = tags.map((id) => {
       const i = TAGS.findIndex((t) => t.id === id);
       return `<span class="stub trace t-${id}" style="${tagVar(id, i)}"></span>` +
@@ -169,52 +167,106 @@
       return `<span class="badge t-${id}" style="--c:var(--c-${id})">${t.label}</span>`;
     }).join('');
 
-    const when = `${fmtMonth(job.start)} – ${job.current ? 'now' : fmtMonth(job.end)}`;
+    const name = href
+      ? `<a href="${escapeHtml(href)}">${escapeHtml(title)}</a>`
+      : escapeHtml(title);
 
     const row = document.createElement('article');
     row.className = 'row';
     row.dataset.tags = tags.join(' ');
     row.innerHTML = `
       <div class="row-inner">
-        <div class="gutter">${lanes()}${stubs}</div>
         <div class="cell">
           <div class="card">
+            ${stubs}
             <header class="card-hdr">
               <div>
-                <h3>${escapeHtml(job.role)}</h3>
-                <p class="company">${escapeHtml(job.company.trim())}</p>
+                <h3>${name}</h3>
+                ${sub ? `<p class="company">${escapeHtml(sub)}</p>` : ''}
               </div>
-              <p class="when">${when}${job.length ? `<span>${escapeHtml(job.length)}</span>` : ''}</p>
+              <p class="when">${when}${length ? `<span>${escapeHtml(length)}</span>` : ''}</p>
             </header>
             ${stack.length ? `<p class="stack">${stack.map(escapeHtml).join(' · ')}</p>` : ''}
             ${badges ? `<div class="badges">${badges}</div>` : ''}
-            ${body}
+            ${body ? `<div class="body">${body}</div>` : ''}
           </div>
         </div>
       </div>`;
     return row;
   }
 
-  function renderHistory(data, tagMap) {
-    history.innerHTML = `
-      <div class="bus bus-head"><div class="gutter">${lanes()}</div>
-        <div class="cell"><p class="status silk" id="status"></p></div></div>`;
+  // Only tags the chips know about, in chip order.
+  const known = (tags) => TAGS.map((t) => t.id).filter((id) => (tags || []).includes(id));
 
-    rows = data.career.map((job) => {
+  function careerRows(data, tagMap) {
+    return data.career.map((job) => {
       const key = `${job.start} ${job.company.trim()}`;
-      const tags = tagMap[key] || [];
       if (!tagMap[key]) console.warn(`[career] no tags for "${key}" — add it to data/tags.json`);
-      const row = renderRow(job, TAGS.map((t) => t.id).filter((id) => tags.includes(id)));
+      const { stack, blocks } = parseAchievements(job.achievements);
+      const row = renderRow({
+        title: job.role,
+        sub: job.company.trim(),
+        when: `${fmtMonth(job.start)} – ${job.current ? 'now' : fmtMonth(job.end)}`,
+        length: job.length,
+        stack,
+        tags: known(tagMap[key]),
+        body: renderBlocks(blocks),
+      });
       row.span = [monthIndex(job.start), job.current ? monthIndex(null) : monthIndex(job.end)];
-      history.appendChild(row);
       return row;
     });
+  }
 
-    const end = document.createElement('div');
-    end.className = 'bus bus-end';
-    end.innerHTML = `<div class="gutter">${lanes()}${TAGS.map((t, i) =>
-      `<span class="via end trace t-${t.id}" style="${tagVar(t.id, i)}"></span>`).join('')}</div><div class="cell"></div>`;
-    history.appendChild(end);
+  // Languages making up at least 5% of the code, biggest first.
+  function mainLanguages(languages) {
+    const total = Object.values(languages).reduce((a, b) => a + b, 0) || 1;
+    return Object.entries(languages).sort((a, b) => b[1] - a[1])
+      .filter(([, bytes]) => bytes / total >= 0.05).map(([lang]) => lang);
+  }
+
+  function repoRows(data, notes) {
+    return data.repos
+      .filter((r) => !notes[r.name]?.hide && r.firstCommit)
+      .sort((a, b) => b.lastCommit.localeCompare(a.lastCommit))
+      .map((repo) => {
+        const note = notes[repo.name];
+        if (!note) console.warn(`[career] no notes for repo "${repo.name}" — add it to data/repo-notes.json`);
+        const span = [monthIndex(repo.firstCommit.slice(0, 7)), monthIndex(repo.lastCommit.slice(0, 7))];
+        const ongoing = span[1] === monthIndex(null);
+        const row = renderRow({
+          title: repo.name,
+          href: repo.url,
+          sub: mainLanguages(repo.languages).join(' · '),
+          when: `${fmtMonth(repo.firstCommit.slice(0, 7))} – ${ongoing ? 'now' : fmtMonth(repo.lastCommit.slice(0, 7))}`,
+          length: experience([span]),
+          stack: [`${repo.commits} commit${repo.commits === 1 ? '' : 's'}`],
+          tags: known(note?.tags),
+          body: linkify(note?.blurb || repo.description || ''),
+        });
+        row.span = span;
+        return row;
+      });
+  }
+
+  function renderWork(career, tagMap, repos, notes) {
+    cols[0].rows = careerRows(career, tagMap);
+    cols[1].rows = repos ? repoRows(repos, notes) : [];
+
+    const laneEls = TAGS.map((t, i) =>
+      `<span class="lane trace t-${t.id}" style="${tagVar(t.id, i)}"></span>` +
+      `<span class="via end trace t-${t.id}" style="${tagVar(t.id, i)}"></span>`).join('');
+    work.innerHTML = `
+      <div class="col col-career"></div>
+      <div class="bus" id="bus">${laneEls}</div>
+      <div class="col col-repos"></div>`;
+
+    cols.forEach((col) => {
+      const el = work.querySelector(`.col-${col.key}`);
+      el.innerHTML = `<header class="col-hdr"><h2 class="silk">${col.title}</h2>
+        <p class="status silk"></p></header>`;
+      col.status = el.querySelector('.status');
+      col.rows.forEach((row) => el.appendChild(row));
+    });
   }
 
   function renderExtras(data) {
@@ -225,30 +277,40 @@
       <div class="panel"><h2 class="silk">Education</h2><ul class="edu">${edu}</ul></div>
       <div class="panel"><h2 class="silk">Skills</h2><ul class="skills">${skills}</ul></div>`;
 
-    const when = new Date(data.scrapedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-    document.getElementById('foot').textContent = `Career data imported from SEEK · ${when}`;
+  }
+
+  function renderFoot(career, repos) {
+    const date = (iso) => new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('foot').textContent = [
+      `Career data imported from SEEK · ${date(career.scrapedAt)}`,
+      repos && `GitHub data imported · ${date(repos.scrapedAt)}`,
+    ].filter(Boolean).join('   ·   ');
   }
 
   // ---------- fanout: sockets -> lane bus ----------
 
-  // Socket i's trace drops, turns left at height h_i, and joins lane i.
-  // Sockets and lanes both run left to right and h_i increases with i, so
-  // no two traces cross.
+  // Socket i's trace drops to height h_i, runs sideways to lane i, and joins it.
+  // Traces heading left (socket right of its lane) turn in index order, so
+  // h rises with i; traces heading right turn in reverse order. Sockets and
+  // lanes both run left to right, which keeps every trace from crossing.
   function drawFanout() {
     const sockets = [...document.querySelectorAll('.socket')];
-    const laneEls = [...document.querySelectorAll('.bus-head .lane')];
+    const laneEls = [...document.querySelectorAll('#bus .lane')];
     if (!sockets.length || !laneEls.length) return;
 
     const box = fanout.getBoundingClientRect();
     const step = 12;
     const top = 14;
-    const height = top + TAGS.length * step + 10;
     const centre = (el) => { const r = el.getBoundingClientRect(); return r.left + r.width / 2 - box.left; };
 
-    const paths = TAGS.map((t, i) => {
-      const x = centre(sockets[i]);
-      const l = centre(laneEls[i]);
-      const h = top + i * step;
+    const traces = TAGS.map((t, i) => ({ t, i, x: centre(sockets[i]), l: centre(laneEls[i]) }));
+    const leftward = traces.filter((tr) => tr.x - tr.l >= 1);
+    const rightward = traces.filter((tr) => tr.l - tr.x >= 1);
+    leftward.forEach((tr, k) => { tr.h = top + k * step; });
+    rightward.forEach((tr, k) => { tr.h = top + (rightward.length - 1 - k) * step; });
+    const height = top + Math.max(leftward.length, rightward.length, 1) * step + 10;
+
+    const paths = traces.map(({ t, i, x, l, h }) => {
       const dx = x - l;
       let d;
       if (Math.abs(dx) < 1) {
@@ -274,21 +336,22 @@
 
   function apply() {
     TAGS.forEach((t) => board.classList.toggle(`on-${t.id}`, on.has(t.id)));
-    const shown = [];
-    rows.forEach((row) => {
-      const tags = row.dataset.tags.split(' ').filter(Boolean);
-      const show = on.size === 0 || tags.some((id) => on.has(id));
-      row.classList.toggle('off', !show);
-      row.inert = !show;
-      if (show) shown.push(row);
+    cols.forEach((col) => {
+      const shown = [];
+      col.rows.forEach((row) => {
+        const tags = row.dataset.tags.split(' ').filter(Boolean);
+        const show = on.size === 0 || tags.some((id) => on.has(id));
+        row.classList.toggle('off', !show);
+        row.inert = !show;
+        if (show) shown.push(row);
+      });
+      if (!col.status) return;
+      const total = col.rows.length;
+      col.status.textContent = on.size
+        ? `${shown.length} of ${total} ${col.noun}s · ${experience(shown.map((r) => r.span))}`
+        : `${total} ${col.noun}s · no chips selected`;
+      col.status.classList.toggle('idle', on.size === 0);
     });
-    const status = document.getElementById('status');
-    if (status) {
-      status.textContent = on.size
-        ? `${shown.length} of ${rows.length} roles · ${experience(shown.map((r) => r.span))}`
-        : `${rows.length} roles · no chips selected`;
-      status.classList.toggle('idle', on.size === 0);
-    }
   }
 
   // Browsers refuse audio until the visitor has interacted with the page,
@@ -304,7 +367,7 @@
     chip.setAttribute('aria-pressed', String(seating));
 
     if (seating) {
-      chip.classList.remove('lifting', 'wiggle');
+      chip.classList.remove('lifting');
       chip.classList.add('seated');
       if (audible()) CircuitAudio.on({ land: LAND_MS / 1000, live: LIVE_MS / 1000 });
       pending.set(id, setTimeout(() => {
@@ -326,55 +389,52 @@
 
   // ---------- demo ----------
 
-  // Left alone with nothing selected, the board demos itself: DEMO_FIRST_MS
-  // after the intro (DEMO_IDLE_MS once the visitor has had a go) it seats a chip, holds it for DEMO_HOLD_MS, pulls it and seats the
-  // next, round and round. Any chip click hands control back to the visitor.
-  const DEMO_FIRST_MS = 5000;
-  const DEMO_IDLE_MS = 10000;
+  // Left alone after the intro, the board demos itself. For the first
+  // DEMO_FIRST_MS the "select a chip" prompt shouts; then it seats a chip,
+  // and every DEMO_HOLD_MS seats the next one, pulling the previous chip
+  // DEMO_OVERLAP_MS later so two are briefly live together. The visitor's
+  // first chip click ends the demo for good.
+  const DEMO_FIRST_MS = 7000;
   const DEMO_HOLD_MS = 5000;
-  const DEMO_SWAP_MS = 700;
-  const demo = { timer: null, chip: null, next: 0 };
+  const DEMO_OVERLAP_MS = 1000;
+  const demo = { timers: [], seated: new Set(), next: 0, over: false };
 
-  function armDemo(delay = DEMO_IDLE_MS) {
-    clearTimeout(demo.timer);
-    demo.timer = setTimeout(() => { if (on.size === 0) demoStep(); }, delay);
+  const later = (fn, ms) => demo.timers.push(setTimeout(fn, ms));
+  const prompt = () => document.querySelector('.bay-label');
+
+  function armDemo(delay) {
+    prompt().classList.add('shout');
+    later(() => {
+      prompt().classList.remove('shout');
+      demoStep();
+    }, delay);
   }
 
   function demoStep() {
     const chips = [...document.querySelectorAll('.chip')];
-    demo.chip = chips[demo.next % chips.length];
-    demo.next++;
-    toggle(demo.chip);
-    demo.timer = setTimeout(() => {
-      toggle(demo.chip);
-      demo.chip = null;
-      demo.timer = setTimeout(demoStep, DEMO_SWAP_MS);
-    }, DEMO_HOLD_MS);
+    const chip = chips[demo.next++ % chips.length];
+    const previous = [...demo.seated];
+    toggle(chip);
+    demo.seated.add(chip);
+    later(() => previous.forEach((c) => { toggle(c); demo.seated.delete(c); }), DEMO_OVERLAP_MS);
+    later(demoStep, DEMO_HOLD_MS);
+  }
+
+  // Pulls the demo's chips; returns true if the visitor clicked one of them,
+  // in which case it stays in and becomes theirs.
+  function stopDemo(clicked) {
+    demo.over = true;
+    demo.timers.forEach(clearTimeout);
+    prompt().classList.remove('shout');
+    const adopted = demo.seated.has(clicked);
+    demo.seated.forEach((c) => { if (c !== clicked) toggle(c); });
+    demo.seated.clear();
+    return adopted;
   }
 
   function userToggle(chip) {
-    clearTimeout(demo.timer);
-    const demoChip = demo.chip;
-    demo.chip = null;
-    if (demoChip && demoChip !== chip) toggle(demoChip);
-    // Clicking the chip the demo just seated keeps it in: the visitor adopts it.
-    if (demoChip !== chip) toggle(chip);
-    if (![...document.querySelectorAll('.chip')].some(isSeated)) armDemo();
-  }
-
-  // ---------- idle fidget ----------
-
-  // Every few seconds a random unseated chip wiggles, asking to be plugged in.
-  function scheduleWiggle() {
-    setTimeout(() => {
-      const idle = [...document.querySelectorAll('.chip:not(.seated)')];
-      const chip = idle[Math.floor(Math.random() * idle.length)];
-      if (chip && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        chip.classList.add('wiggle');
-        chip.addEventListener('animationend', () => chip.classList.remove('wiggle'), { once: true });
-      }
-      scheduleWiggle();
-    }, 2500 + Math.random() * 4500);
+    const adopted = !demo.over && stopDemo(chip);
+    if (!adopted) toggle(chip);
   }
 
   // ---------- boot ----------
@@ -383,12 +443,15 @@
   // header text for the intro to type.
   async function load() {
     try {
-      const [data, tagMap] = await Promise.all(
-        ['data/seek-career.json', 'data/tags.json'].map((u) =>
-          fetch(u).then((r) => { if (!r.ok) throw new Error(`${u}: ${r.status}`); return r.json(); })));
+      const get = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(`${u}: ${r.status}`); return r.json(); });
+      const [data, tagMap] = await Promise.all([get('data/seek-career.json'), get('data/tags.json')]);
+      // The repo column is a bonus: if its data is missing, the career still renders.
+      const [repos, notes] = await Promise.all([get('data/github-repos.json'), get('data/repo-notes.json')])
+        .catch((err) => { console.warn('[career] no GitHub data:', err.message); return [null, {}]; });
       renderChips();
-      renderHistory(data, tagMap);
+      renderWork(data, tagMap, repos, notes);
       renderExtras(data);
+      renderFoot(data, repos);
       apply();
       drawFanout();
       document.fonts?.ready.then(drawFanout);
@@ -396,7 +459,7 @@
       new ResizeObserver(() => requestAnimationFrame(drawFanout)).observe(document.getElementById('chips'));
       return headerText(data);
     } catch (err) {
-      history.innerHTML = `<p class="error">Couldn't load the career data (${escapeHtml(err.message)}).
+      work.innerHTML = `<p class="error">Couldn't load the career data (${escapeHtml(err.message)}).
         Opening the file directly won't work — serve the folder, e.g. <code>python3 -m http.server</code>.</p>`;
       return null;
     }
@@ -454,12 +517,82 @@
 
     document.removeEventListener('click', finish);
     document.removeEventListener('keydown', finish);
-    board.classList.add('booted');
-    if (header) {
-      scheduleWiggle();
-      armDemo(DEMO_FIRST_MS);
+    if (!header) {
+      board.classList.add('typed', 'booted');
+      return;
     }
+
+    // Typed: the buttons appear; the intro gets slurped into its own button;
+    // then the chips and everything else come in.
+    board.classList.add('typed');
+    await sleep(INTRO_LINGER_MS);
+    await slurp();
+    await sleep(INTRO_SETTLE_MS);
+    board.classList.add('booted');
+    armDemo(DEMO_FIRST_MS);
   }
+
+  // ---------- intro button: slurp / unslurp ----------
+
+  const INTRO_LINGER_MS = 5000;
+  const INTRO_SETTLE_MS = 1000;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const summaryEl = document.getElementById('summary');
+  const introBtn = document.getElementById('intro-btn');
+  let introBusy = false;
+
+  // Squash the intro flat, then suck it into the button's centre.
+  function slurpFrames() {
+    const s = summaryEl.getBoundingClientRect();
+    const b = introBtn.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - (s.left + s.width / 2);
+    const dy = b.top + b.height / 2 - (s.top + s.height / 2);
+    return [
+      { transform: 'translate(0, 0) scale(1, 1)', opacity: 1, filter: 'blur(0)' },
+      { offset: 0.4, transform: `translate(${dx * 0.15}px, ${dy * 0.45}px) scale(0.75, 0.22)`, opacity: 0.9 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.02, 0.04)`, opacity: 0, filter: 'blur(2px)' },
+    ];
+  }
+
+  async function slurp() {
+    introBusy = true;
+    CircuitAudio.slurp();
+    await summaryEl.animate(slurpFrames(), { duration: 650, easing: 'ease-in', fill: 'forwards' }).finished;
+    introBtn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }],
+      { duration: 280, easing: 'ease-out' });
+    introBtn.setAttribute('aria-expanded', 'false');
+
+    // close the gap it left
+    summaryEl.style.overflow = 'hidden';
+    await summaryEl.animate([{ height: `${summaryEl.offsetHeight}px` }, { height: '0px' }],
+      { duration: 400, easing: 'ease-in-out' }).finished;
+    summaryEl.hidden = true;
+    summaryEl.style.overflow = '';
+    summaryEl.getAnimations().forEach((a) => a.cancel());
+    introBusy = false;
+  }
+
+  // The reverse: open the gap, then the intro spills back out of the button.
+  async function unslurp() {
+    introBusy = true;
+    summaryEl.hidden = false;
+    summaryEl.style.overflow = 'hidden';
+    summaryEl.style.opacity = '0';
+    await summaryEl.animate([{ height: '0px' }, { height: `${summaryEl.offsetHeight}px` }],
+      { duration: 400, easing: 'ease-in-out' }).finished;
+    summaryEl.style.overflow = '';
+    summaryEl.style.opacity = '';
+    introBtn.setAttribute('aria-expanded', 'true');
+    CircuitAudio.slurp(true);
+    await summaryEl.animate(slurpFrames(), { duration: 550, easing: 'ease-in', direction: 'reverse' }).finished;
+    introBusy = false;
+  }
+
+  introBtn.addEventListener('click', () => {
+    if (introBusy) return;
+    if (introBtn.getAttribute('aria-expanded') === 'true') slurp();
+    else unslurp();
+  });
 
   const ready = load();
   const gate = document.getElementById('gate');
