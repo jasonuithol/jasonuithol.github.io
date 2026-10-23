@@ -173,7 +173,7 @@
     }).join('');
 
     const name = href
-      ? `<a href="${escapeHtml(href)}">${escapeHtml(title)}</a>`
+      ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`
       : escapeHtml(title);
 
     const row = document.createElement('article');
