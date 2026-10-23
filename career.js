@@ -403,7 +403,8 @@
   // DEMO_FIRST_MS the "select a chip" prompt shouts; then it seats a chip,
   // and every DEMO_HOLD_MS pops it and, DEMO_GAP_MS later, seats the next.
   // Only one chip is ever in. After one pass through every chip, all chips
-  // are out and the prompt goes back to shouting until the visitor clicks.
+  // are out, the intro spills back out of its button, and the prompt goes
+  // back to shouting until the visitor clicks.
   // The visitor's first chip click ends the demo for good.
   const DEMO_FIRST_MS = 7000;
   const DEMO_HOLD_MS = 5000;
@@ -427,6 +428,10 @@
     const chips = [...document.querySelectorAll('.chip')];
     if (demo.next >= chips.length) {
       prompt().classList.add('shout');
+      // Tour over: bring the intro back out for whoever's still watching.
+      later(() => {
+        if (!introBusy && introBtn.getAttribute('aria-expanded') === 'false') introAnim = unslurp();
+      }, DEMO_GAP_MS);
       return;
     }
     later(() => {
