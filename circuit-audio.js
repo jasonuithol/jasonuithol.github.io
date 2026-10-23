@@ -84,6 +84,20 @@ const CircuitAudio = (() => {
     }
   }
 
+  // A light plastic jiggle: the hovering chip's legs ticking against each
+  // other. Quieter and shorter than the landing rattle, and no thunk.
+  function jiggle(t) {
+    let at = t;
+    let amp = 0.16;
+    const ticks = 4 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < ticks; i++) {
+      burst(at, { freq: 650 + Math.random() * 550, q: 5, peak: amp * 1.2, decay: 0.012 + Math.random() * 0.006 });
+      tone(at, { type: 'triangle', from: 260 + Math.random() * 220, peak: amp * 0.45, decay: 0.022 });
+      at += 0.018 + Math.random() * 0.024;
+      amp *= 0.72;
+    }
+  }
+
   // Rising filtered sweep over a mains hum, capped with a two-note confirm blip.
   function activate(t) {
     tone(t, { type: 'square', from: 180, to: 880, peak: 0.09, attack: 0.01, decay: 0.22, glide: 0.18,
@@ -142,6 +156,11 @@ const CircuitAudio = (() => {
   }
 
   return {
+    // Mouse over an unseated chip. Silent until the power button has run.
+    jiggle() {
+      if (!ctx) return;
+      jiggle(ctx.currentTime);
+    },
     slurp(reverse = false) {
       if (!ctx) return;
       slurp(ctx.currentTime, reverse);

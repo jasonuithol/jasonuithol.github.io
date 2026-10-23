@@ -157,6 +157,13 @@
 
     document.querySelectorAll('.chip').forEach((chip) =>
       chip.addEventListener('click', () => userToggle(chip)));
+
+    // Mouse over a hovering chip and it jiggles audibly. Mouse only: on touch
+    // the pointer "enters" on every tap, right before the click sounds.
+    document.querySelectorAll('.chip').forEach((chip) =>
+      chip.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse' && !isSeated(chip)) CircuitAudio.jiggle();
+      }));
   }
 
   // A card in either column. Stubs and vias run from its edge to the lanes.
