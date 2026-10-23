@@ -13,7 +13,7 @@ The previous Matrix-themed repo portfolio lives at the `original` tag.
 | `index.html`             | page shell                                           |
 | `career.css`             | the board, chips, traces, cards                      |
 | `career.js`              | rendering, filtering, chip behaviour                 |
-| `circuit-audio.js`       | synthesised chip sounds (Web Audio)                  |
+| `circuit-audio.js`       | chip sounds (Web Audio synth + `sounds/hover.wav`)  |
 | `data/seek-career.json`  | career data scraped from SEEK                        |
 | `data/tags.json`         | which filters each role belongs to                   |
 | `data/github-repos.json` | repo data scraped from GitHub                        |

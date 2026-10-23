@@ -1,4 +1,4 @@
-// Chip sounds, synthesised with Web Audio — no sample files.
+// Chip sounds, synthesised with Web Audio, plus one sample: the hover tick.
 //   on():  chip lands, pins rattle in the socket, then the circuit powers up
 //   off(): latch click, then the circuit powers down
 
@@ -6,6 +6,12 @@ const CircuitAudio = (() => {
   let ctx = null;
   let out = null;
   let noise = null;
+  let hover = null;
+
+  // Hover sprite: single keystrokes SLOT seconds apart (tools/hover-sprite.py).
+  const HOVER_URL = 'sounds/hover.wav';
+  const HOVER_SLOT = 0.2;
+  const HOVER_LEN = 0.15;
 
   // Created lazily from the first chip click (browsers need a gesture).
   function init() {
@@ -24,6 +30,26 @@ const CircuitAudio = (() => {
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noise.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+
+    fetch(HOVER_URL)
+      .then((r) => r.arrayBuffer())
+      .then((b) => ctx.decodeAudioData(b))
+      .then((buf) => { hover = buf; })
+      .catch(() => {});
+  }
+
+  // One keystroke from the sprite, picked at random and slightly retuned so
+  // no two hovers sound quite the same. Falls back to the synth jiggle.
+  function tick(t) {
+    if (!hover) return jiggle(t);
+    const slots = Math.floor(hover.duration / HOVER_SLOT);
+    const src = ctx.createBufferSource();
+    src.buffer = hover;
+    src.playbackRate.value = 0.9 + Math.random() * 0.2;
+    const g = ctx.createGain();
+    g.gain.value = 0.4;
+    src.connect(g).connect(out);
+    src.start(t, Math.floor(Math.random() * slots) * HOVER_SLOT, HOVER_LEN);
   }
 
   function envelope(g, t, peak, attack, decay) {
@@ -86,6 +112,7 @@ const CircuitAudio = (() => {
 
   // A light plastic jiggle: the hovering chip's legs ticking against each
   // other. Low and chunky, quieter and shorter than the landing rattle.
+  // Only heard if the hover sprite hasn't loaded.
   function jiggle(t) {
     let at = t;
     let amp = 0.16;
@@ -192,7 +219,7 @@ const CircuitAudio = (() => {
     // Mouse over an unseated chip. Silent until the power button has run.
     jiggle() {
       if (!ctx) return;
-      jiggle(ctx.currentTime);
+      tick(ctx.currentTime);
     },
     slurp(reverse = false) {
       if (!ctx) return;
