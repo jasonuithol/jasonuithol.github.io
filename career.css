@@ -22,10 +22,11 @@
   --c-ai:  #b4ff39;
   --c-py:  #3d6bff;
   --c-cld: #dce9ff;
+  --c-etc: #ff7a14;
 
   /* bus geometry: lane i sits at --lane0 + i * --lane-gap inside the bus;
      cards sit --card-gap away from it */
-  --bus-w: calc(2 * var(--lane0) + 7 * var(--lane-gap) + var(--trace-w));
+  --bus-w: calc(2 * var(--lane0) + 8 * var(--lane-gap) + var(--trace-w));
   --card-gap: 16px;
   --lane0: 12px;
   --lane-gap: 12px;
@@ -223,7 +224,7 @@ button.silk-btn { background: none; cursor: pointer; line-height: normal; }
 
 .chips {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: clamp(6px, 2vw, 18px);
 }
 
@@ -444,7 +445,8 @@ button.silk-btn { background: none; cursor: pointer; line-height: normal; }
 .board.on-fe  .t-fe,
 .board.on-ai  .t-ai,
 .board.on-py  .t-py,
-.board.on-cld .t-cld { --lit: 1; }
+.board.on-cld .t-cld,
+.board.on-etc .t-etc { --lit: 1; }
 
 .trace::after {
   content: '';
@@ -491,7 +493,8 @@ button.silk-btn { background: none; cursor: pointer; line-height: normal; }
 .board.on-fe  .tr-pad.t-fe,
 .board.on-ai  .tr-pad.t-ai,
 .board.on-py  .tr-pad.t-py,
-.board.on-cld .tr-pad.t-cld { fill: var(--c); }
+.board.on-cld .tr-pad.t-cld,
+.board.on-etc .tr-pad.t-etc { fill: var(--c); }
 
 @keyframes flow { to { stroke-dashoffset: -25; } }
 
@@ -679,7 +682,8 @@ button.silk-btn { background: none; cursor: pointer; line-height: normal; }
 .board.on-fe  .badge.t-fe,
 .board.on-ai  .badge.t-ai,
 .board.on-py  .badge.t-py,
-.board.on-cld .badge.t-cld { color: #fff; box-shadow: 0 0 10px -2px var(--c); }
+.board.on-cld .badge.t-cld,
+.board.on-etc .badge.t-etc { color: #fff; box-shadow: 0 0 10px -2px var(--c); }
 
 .body { margin-top: 10px; font-size: 0.9rem; line-height: 1.55; color: #d5dfd7; }
 .body p { margin: 0.5rem 0; }

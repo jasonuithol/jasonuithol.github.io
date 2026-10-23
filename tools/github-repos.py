@@ -2,8 +2,9 @@
 """GitHub repos -> data/github-repos.json.
 
 Lists the account's public, non-fork repos (minus this site's own repo) and,
-for each, reads its commit history for the first and last commit dates and
-the commit count, plus GitHub's language breakdown.
+for each, reads its full commit history: first and last commit dates, the
+commit count, and the months that had at least one commit (so idle years
+between bursts don't count as work). Plus GitHub's language breakdown.
 
 Uses the `gh` CLI for auth, so run `gh auth login` first. Overwrites the
 output file; hand-written blurbs and filter tags live in data/repo-notes.json.
@@ -12,7 +13,6 @@ output file; hand-written blurbs and filter tags live in data/repo-notes.json.
 """
 
 import json
-import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -30,29 +30,16 @@ def api(path):
     return json.loads(gh("api", path))
 
 
-def commit_date(commit):
-    return commit["commit"]["author"]["date"]
-
-
-def commit_span(full_name):
-    """(first commit date, last commit date, commit count) on the default branch.
-
-    With per_page=1 the last page number is the commit count, and that page
-    holds the oldest commit.
-    """
-    out = gh("api", "-i", f"repos/{full_name}/commits?per_page=1")
-    head, _, body = out.partition("\r\n\r\n")
-    if not body:
-        head, _, body = out.partition("\n\n")
-    newest = json.loads(body)
-    if not newest:
-        return None, None, 0
-    m = re.search(r'[?&]page=(\d+)>; rel="last"', head)
-    if not m:
-        return commit_date(newest[0]), commit_date(newest[0]), 1
-    count = int(m.group(1))
-    oldest = api(f"repos/{full_name}/commits?per_page=1&page={count}")
-    return commit_date(oldest[0]), commit_date(newest[0]), count
+def commit_history(full_name):
+    """(first commit date, last commit date, commit count, active months)
+    on the default branch. Active months are "YYYY-MM", sorted."""
+    out = gh("api", "--paginate", f"repos/{full_name}/commits?per_page=100",
+             "--jq", ".[].commit.author.date")
+    dates = sorted(line for line in out.split() if line)
+    if not dates:
+        return None, None, 0, []
+    months = sorted({d[:7] for d in dates})
+    return dates[0], dates[-1], len(dates), months
 
 
 def main():
@@ -65,7 +52,7 @@ def main():
         if r["name"] in SKIP:
             continue
         print(f"  {r['name']}", file=sys.stderr)
-        first, last, count = commit_span(r["nameWithOwner"])
+        first, last, count, months = commit_history(r["nameWithOwner"])
         languages = api(f"repos/{r['nameWithOwner']}/languages")
         result.append({
             "name": r["name"],
@@ -76,6 +63,7 @@ def main():
             "firstCommit": first,
             "lastCommit": last,
             "commits": count,
+            "activeMonths": months,
         })
     data = {
         "source": f"https://github.com/{OWNER}",

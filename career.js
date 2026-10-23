@@ -19,6 +19,8 @@
     { id: 'ai',  label: 'AI',       short: 'AI' },
     { id: 'py',  label: 'Python',   short: 'PY' },
     { id: 'cld', label: 'Cloud',    short: 'CLD' },
+    // Assigned automatically to any card no other chip matches.
+    { id: 'etc', label: 'Etc',      short: 'ETC' },
   ];
 
   // Matches the `seat` keyframes in career.css: the chip hits the socket at
@@ -66,18 +68,19 @@
     return y * 12 + m - 1;
   }
 
-  // Total time covered by [start, end] month spans (inclusive, as SEEK counts
-  // them), with overlapping roles counted once.
-  function experience(spans) {
-    const sorted = spans.filter(([a, b]) => !Number.isNaN(a) && !Number.isNaN(b))
-      .sort((x, y) => x[0] - y[0]);
-    let months = 0;
-    let reach = -Infinity;
-    for (const [a, b] of sorted) {
-      const from = Math.max(a, reach + 1);
-      if (b >= from) months += b - from + 1;
-      reach = Math.max(reach, b);
-    }
+  // Every month from start to end inclusive (as SEEK counts them).
+  function monthRange(a, b) {
+    if (Number.isNaN(a) || Number.isNaN(b)) return [];
+    return Array.from({ length: Math.max(0, b - a + 1) }, (_, k) => a + k);
+  }
+
+  // Total time across cards: each card is a list of month indices (a role's
+  // whole tenure, a repo's months with commits); overlaps count once.
+  function experience(monthLists) {
+    return formatMonths(new Set(monthLists.flat()).size);
+  }
+
+  function formatMonths(months) {
     const y = Math.floor(months / 12);
     const m = months % 12;
     const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
@@ -197,8 +200,11 @@
     return row;
   }
 
-  // Only tags the chips know about, in chip order.
-  const known = (tags) => TAGS.map((t) => t.id).filter((id) => (tags || []).includes(id));
+  // Only tags the chips know about, in chip order; a card with none gets Etc.
+  function known(tags) {
+    const ids = TAGS.map((t) => t.id).filter((id) => (tags || []).includes(id));
+    return ids.length ? ids : ['etc'];
+  }
 
   function careerRows(data, tagMap) {
     return data.career.map((job) => {
@@ -214,7 +220,7 @@
         tags: known(tagMap[key]),
         body: renderBlocks(blocks),
       });
-      row.span = [monthIndex(job.start), job.current ? monthIndex(null) : monthIndex(job.end)];
+      row.months = monthRange(monthIndex(job.start), job.current ? monthIndex(null) : monthIndex(job.end));
       return row;
     });
   }
@@ -233,19 +239,21 @@
       .map((repo) => {
         const note = notes[repo.name];
         if (!note) console.warn(`[career] no notes for repo "${repo.name}" — add it to data/repo-notes.json`);
-        const span = [monthIndex(repo.firstCommit.slice(0, 7)), monthIndex(repo.lastCommit.slice(0, 7))];
-        const ongoing = span[1] === monthIndex(null);
+        // Months with at least one commit: a repo touched in 2016 and again
+        // in 2026 is not ten years of work.
+        const months = (repo.activeMonths || []).map(monthIndex);
+        const ongoing = monthIndex(repo.lastCommit.slice(0, 7)) === monthIndex(null);
         const row = renderRow({
           title: repo.name,
           href: repo.url,
           sub: mainLanguages(repo.languages).join(' · '),
           when: `${fmtMonth(repo.firstCommit.slice(0, 7))} – ${ongoing ? 'now' : fmtMonth(repo.lastCommit.slice(0, 7))}`,
-          length: experience([span]),
+          length: `${formatMonths(months.length)} active`,
           stack: [`${repo.commits} commit${repo.commits === 1 ? '' : 's'}`],
           tags: known(note?.tags),
           body: linkify(note?.blurb || repo.description || ''),
         });
-        row.span = span;
+        row.months = months;
         return row;
       });
   }
@@ -350,7 +358,7 @@
       if (!col.status) return;
       const total = col.rows.length;
       col.status.textContent = on.size
-        ? `${shown.length} of ${total} ${col.noun}s · ${experience(shown.map((r) => r.span))}`
+        ? `${shown.length} of ${total} ${col.noun}s · ${experience(shown.map((r) => r.months))}`
         : `${total} ${col.noun}s · no chips selected`;
       col.status.classList.toggle('idle', on.size === 0);
     });
@@ -457,9 +465,12 @@
   // header text for the intro to type.
   async function load() {
     try {
-      const get = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(`${u}: ${r.status}`); return r.json(); });
+      // no-cache = revalidate: the data changes with deploys, and new code
+      // reading stale data (Pages caches for 10 minutes) renders nonsense.
+      const get = (u) => fetch(u, { cache: 'no-cache' })
+        .then((r) => { if (!r.ok) throw new Error(`${u}: ${r.status}`); return r.json(); });
       const [data, tagMap] = await Promise.all([get('data/seek-career.json'), get('data/tags.json')]);
-      const intro = await fetch('data/intro.txt').then((r) => (r.ok ? r.text() : null)).catch(() => null);
+      const intro = await fetch('data/intro.txt', { cache: 'no-cache' }).then((r) => (r.ok ? r.text() : null)).catch(() => null);
       // The repo column is a bonus: if its data is missing, the career still renders.
       const [repos, notes] = await Promise.all([get('data/github-repos.json'), get('data/repo-notes.json')])
         .catch((err) => { console.warn('[career] no GitHub data:', err.message); return [null, {}]; });
@@ -538,10 +549,12 @@
     }
 
     // Typed: the buttons appear; the intro gets slurped into its own button;
-    // then the chips and everything else come in.
+    // then the chips and everything else come in. If the visitor works the
+    // Intro button themselves, stop waiting and leave the intro as they set it.
     board.classList.add('typed');
-    await sleep(INTRO_LINGER_MS);
-    await slurp();
+    await Promise.race([sleep(INTRO_LINGER_MS), introTouched]);
+    if (touchedIntro) await introAnim;
+    else await slurp();
     await sleep(INTRO_SETTLE_MS);
     board.classList.add('booted');
     armDemo(DEMO_FIRST_MS);
@@ -555,6 +568,10 @@
   const summaryEl = document.getElementById('summary');
   const introBtn = document.getElementById('intro-btn');
   let introBusy = false;
+  let introAnim = Promise.resolve();
+  let touchedIntro = false;
+  let touchIntro;
+  const introTouched = new Promise((r) => { touchIntro = r; });
 
   // Squash the intro flat, then suck it into the button's centre.
   function slurpFrames() {
@@ -605,8 +622,9 @@
 
   introBtn.addEventListener('click', () => {
     if (introBusy) return;
-    if (introBtn.getAttribute('aria-expanded') === 'true') slurp();
-    else unslurp();
+    touchedIntro = true;
+    touchIntro();
+    introAnim = introBtn.getAttribute('aria-expanded') === 'true' ? slurp() : unslurp();
   });
 
   const ready = load();
