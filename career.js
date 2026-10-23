@@ -394,8 +394,9 @@
   // Left alone after the intro, the board demos itself. For the first
   // DEMO_FIRST_MS the "select a chip" prompt shouts; then it seats a chip,
   // and every DEMO_HOLD_MS pops it and, DEMO_GAP_MS later, seats the next.
-  // Only one chip is ever in. The visitor's first chip click ends the demo
-  // for good.
+  // Only one chip is ever in. After one pass through every chip, all chips
+  // are out and the prompt goes back to shouting until the visitor clicks.
+  // The visitor's first chip click ends the demo for good.
   const DEMO_FIRST_MS = 7000;
   const DEMO_HOLD_MS = 5000;
   const DEMO_GAP_MS = 1000;
@@ -415,9 +416,13 @@
   function demoStep() {
     const previous = [...demo.seated];
     previous.forEach((c) => { toggle(c); demo.seated.delete(c); });
+    const chips = [...document.querySelectorAll('.chip')];
+    if (demo.next >= chips.length) {
+      prompt().classList.add('shout');
+      return;
+    }
     later(() => {
-      const chips = [...document.querySelectorAll('.chip')];
-      const chip = chips[demo.next++ % chips.length];
+      const chip = chips[demo.next++];
       toggle(chip);
       demo.seated.add(chip);
       later(demoStep, DEMO_HOLD_MS);
