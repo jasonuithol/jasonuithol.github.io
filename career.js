@@ -123,10 +123,12 @@
   // ---------- rendering ----------
 
   // The header is typed out by the intro, so this just hands back its text.
-  function headerText(data) {
+  // data/intro.txt, when present, replaces the SEEK summary (it survives
+  // re-imports); paragraphs are separated by blank lines.
+  function headerText(data, intro) {
     if (data.source) document.getElementById('seek-link').href = data.source;
     // Drop the line that's just a link back to this site.
-    const paras = (data.summary || '').split(/\n\s*\n/).map((p) => p.trim())
+    const paras = (intro || data.summary || '').split(/\n\s*\n/).map((p) => p.trim())
       .filter((p) => p && !/^https?:\/\/jasonuithol\.github\.io\/?$/.test(p));
     return { name: data.name, location: data.location || '', paras };
   }
@@ -391,12 +393,12 @@
 
   // Left alone after the intro, the board demos itself. For the first
   // DEMO_FIRST_MS the "select a chip" prompt shouts; then it seats a chip,
-  // and every DEMO_HOLD_MS seats the next one, pulling the previous chip
-  // DEMO_OVERLAP_MS later so two are briefly live together. The visitor's
-  // first chip click ends the demo for good.
+  // and every DEMO_HOLD_MS pops it and, DEMO_GAP_MS later, seats the next.
+  // Only one chip is ever in. The visitor's first chip click ends the demo
+  // for good.
   const DEMO_FIRST_MS = 7000;
   const DEMO_HOLD_MS = 5000;
-  const DEMO_OVERLAP_MS = 1000;
+  const DEMO_GAP_MS = 1000;
   const demo = { timers: [], seated: new Set(), next: 0, over: false };
 
   const later = (fn, ms) => demo.timers.push(setTimeout(fn, ms));
@@ -411,13 +413,15 @@
   }
 
   function demoStep() {
-    const chips = [...document.querySelectorAll('.chip')];
-    const chip = chips[demo.next++ % chips.length];
     const previous = [...demo.seated];
-    toggle(chip);
-    demo.seated.add(chip);
-    later(() => previous.forEach((c) => { toggle(c); demo.seated.delete(c); }), DEMO_OVERLAP_MS);
-    later(demoStep, DEMO_HOLD_MS);
+    previous.forEach((c) => { toggle(c); demo.seated.delete(c); });
+    later(() => {
+      const chips = [...document.querySelectorAll('.chip')];
+      const chip = chips[demo.next++ % chips.length];
+      toggle(chip);
+      demo.seated.add(chip);
+      later(demoStep, DEMO_HOLD_MS);
+    }, previous.length ? DEMO_GAP_MS : 0);
   }
 
   // Pulls the demo's chips; returns true if the visitor clicked one of them,
@@ -432,9 +436,14 @@
     return adopted;
   }
 
+  // One chip at a time: seating a chip pops whatever else is in.
   function userToggle(chip) {
     const adopted = !demo.over && stopDemo(chip);
-    if (!adopted) toggle(chip);
+    if (adopted) return;
+    if (!isSeated(chip)) {
+      document.querySelectorAll('.chip').forEach((c) => { if (c !== chip && isSeated(c)) toggle(c); });
+    }
+    toggle(chip);
   }
 
   // ---------- boot ----------
@@ -445,6 +454,7 @@
     try {
       const get = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(`${u}: ${r.status}`); return r.json(); });
       const [data, tagMap] = await Promise.all([get('data/seek-career.json'), get('data/tags.json')]);
+      const intro = await fetch('data/intro.txt').then((r) => (r.ok ? r.text() : null)).catch(() => null);
       // The repo column is a bonus: if its data is missing, the career still renders.
       const [repos, notes] = await Promise.all([get('data/github-repos.json'), get('data/repo-notes.json')])
         .catch((err) => { console.warn('[career] no GitHub data:', err.message); return [null, {}]; });
@@ -457,7 +467,7 @@
       document.fonts?.ready.then(drawFanout);
       // The chip row's size is all the fanout geometry depends on.
       new ResizeObserver(() => requestAnimationFrame(drawFanout)).observe(document.getElementById('chips'));
-      return headerText(data);
+      return headerText(data, intro);
     } catch (err) {
       work.innerHTML = `<p class="error">Couldn't load the career data (${escapeHtml(err.message)}).
         Opening the file directly won't work — serve the folder, e.g. <code>python3 -m http.server</code>.</p>`;
