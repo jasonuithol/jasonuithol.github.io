@@ -85,7 +85,7 @@ const CircuitAudio = (() => {
   }
 
   // A light plastic jiggle: the hovering chip's legs ticking against each
-  // other. Quieter and shorter than the landing rattle, and no thunk.
+  // other. Low and chunky, quieter and shorter than the landing rattle.
   function jiggle(t) {
     let at = t;
     let amp = 0.16;
@@ -95,6 +95,39 @@ const CircuitAudio = (() => {
       tone(at, { type: 'triangle', from: 260 + Math.random() * 220, peak: amp * 0.45, decay: 0.022 });
       at += 0.018 + Math.random() * 0.024;
       amp *= 0.72;
+    }
+  }
+
+  // Not used yet. Modelled on a knife dropped on cement (Soundsnap "Foley
+  // knife drop on cement 01", analysed for timing and pitch, no audio used),
+  // but it came out sounding like a glass bottle rattling on tarmac, so it's
+  // kept for when the site needs exactly that. A hard first impact, a bounce
+  // at ~0.2s about a third as loud, then faint settling ticks. Each hit is a click of noise plus three short metallic ring modes
+  // near 3.5, 5.7 and 9.3 kHz. Timing and pitch wobble a little per play.
+  const BOTTLE_HITS = [
+    // [seconds, relative level, ring decay in seconds]
+    [0.000, 1.00, 0.070],
+    [0.085, 0.10, 0.020],
+    [0.200, 0.12, 0.025],
+    [0.220, 0.35, 0.030],
+    [0.300, 0.10, 0.025],
+    [0.320, 0.16, 0.018],
+    [0.360, 0.09, 0.025],
+    [0.400, 0.07, 0.020],
+  ];
+  const BOTTLE_MODES = [[3500, 1.0], [5700, 0.7], [9300, 0.55]];
+
+  function bottle(t) {
+    const stretch = 0.9 + Math.random() * 0.2;
+    const detune = 0.97 + Math.random() * 0.06;
+    for (const [at, level, ring] of BOTTLE_HITS) {
+      const when = t + at * stretch + (at ? (Math.random() - 0.5) * 0.01 : 0);
+      const amp = 0.22 * level * (0.8 + Math.random() * 0.4);
+      burst(when, { freq: 4500, q: 0.7, peak: amp * 0.8, decay: 0.006 });
+      for (const [f, w] of BOTTLE_MODES) {
+        tone(when, { from: f * detune * (0.99 + Math.random() * 0.02), peak: amp * w * 0.5,
+                     attack: 0.001, decay: ring * (0.8 + Math.random() * 0.4) });
+      }
     }
   }
 
