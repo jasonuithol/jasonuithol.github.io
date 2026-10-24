@@ -91,7 +91,7 @@
 
 
   // SEEK achievements are free text. Usually: a comma-separated tech line,
-  // then paragraphs and bullet lines (•, *, -).
+  // then paragraphs, bullet lines (•, *, -) and [Heading] lines.
   function parseAchievements(text) {
     const lines = (text || '').replace(/\r/g, '').split('\n').map((l) => l.trim());
     const stack = [];
@@ -104,6 +104,11 @@
     const blocks = [];
     for (const line of lines.slice(i)) {
       if (!line) continue;
+      const heading = /^\[(.+)\]$/.exec(line);
+      if (heading) {
+        blocks.push({ type: 'h', text: heading[1] });
+        continue;
+      }
       const bullet = /^[•*\-]\s*/.exec(line);
       if (bullet) {
         const item = line.slice(bullet[0].length);
@@ -118,8 +123,8 @@
   }
 
   function renderBlocks(blocks) {
-    return blocks.map((b) => b.type === 'p'
-      ? `<p>${linkify(b.text)}</p>`
+    return blocks.map((b) => b.type === 'h' ? `<h4>${linkify(b.text)}</h4>`
+      : b.type === 'p' ? `<p>${linkify(b.text)}</p>`
       : `<ul>${b.items.map((it) => `<li>${linkify(it)}</li>`).join('')}</ul>`).join('');
   }
 

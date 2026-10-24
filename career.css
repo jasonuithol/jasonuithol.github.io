@@ -695,6 +695,7 @@ button.silk-btn { background: none; cursor: pointer; line-height: normal; }
 
 .body { margin-top: 10px; font-size: 0.9rem; line-height: 1.55; color: #d5dfd7; }
 .body p { margin: 0.5rem 0; }
+.body h4 { margin: 0.9rem 0 0.2rem; font-size: 0.9rem; font-weight: 600; color: #eef4ef; }
 .body ul { margin: 0.4rem 0; padding-left: 1.1rem; }
 .body li { margin: 0.2rem 0; }
 
