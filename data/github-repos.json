@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/jasonuithol",
-  "scrapedAt": "2026-10-23T00:45:47+00:00",
+  "scrapedAt": "2026-11-05T07:50:24+00:00",
   "repos": [
     {
       "name": "AdminHelpDesk",
@@ -160,14 +160,14 @@
       "description": "Design documents for rebuilding Ultima V inside Valheim (BepInEx/Jötunn mod)",
       "topics": [],
       "languages": {
-        "C#": 2055922,
+        "C#": 2216302,
         "Python": 7789,
         "Shell": 3198,
         "Rust": 1304
       },
       "firstCommit": "2026-10-16T02:53:39Z",
-      "lastCommit": "2026-10-22T10:54:18Z",
-      "commits": 194,
+      "lastCommit": "2026-10-23T09:17:30Z",
+      "commits": 200,
       "activeMonths": [
         "2026-10"
       ]
@@ -261,21 +261,76 @@
       ]
     },
     {
+      "name": "DayZHandCart",
+      "url": "https://github.com/jasonuithol/DayZHandCart",
+      "description": "A hand truck for DayZ: carry safes, crates, barrels and more",
+      "topics": [],
+      "languages": {
+        "C": 115078,
+        "Python": 63113,
+        "C++": 17060,
+        "Shell": 7578
+      },
+      "firstCommit": "2026-10-31T05:17:21Z",
+      "lastCommit": "2026-11-02T04:45:20Z",
+      "commits": 17,
+      "activeMonths": [
+        "2026-10",
+        "2026-11"
+      ]
+    },
+    {
       "name": "DayZMissions",
       "url": "https://github.com/jasonuithol/DayZMissions",
       "description": "Scripted vanilla missions for DayZ dedicated servers, with Linux deploy/run/test tooling",
       "topics": [],
       "languages": {
         "C": 82405,
-        "Shell": 29348,
-        "Python": 18820,
+        "Shell": 30739,
+        "Python": 19307,
         "C++": 1628
       },
       "firstCommit": "2026-09-21T06:41:54Z",
-      "lastCommit": "2026-09-29T03:19:57Z",
-      "commits": 52,
+      "lastCommit": "2026-11-01T05:22:45Z",
+      "commits": 59,
       "activeMonths": [
-        "2026-09"
+        "2026-09",
+        "2026-10",
+        "2026-11"
+      ]
+    },
+    {
+      "name": "DayZMolotov",
+      "url": "https://github.com/jasonuithol/DayZMolotov",
+      "description": "A molotov cocktail for DayZ: craft it from a glass bottle, petrol and a rag, light it, throw it",
+      "topics": [],
+      "languages": {
+        "Python": 27344,
+        "C": 25756,
+        "Shell": 3549,
+        "C++": 2169
+      },
+      "firstCommit": "2026-11-02T16:37:59Z",
+      "lastCommit": "2026-11-05T01:59:12Z",
+      "commits": 5,
+      "activeMonths": [
+        "2026-11"
+      ]
+    },
+    {
+      "name": "DayzPortals",
+      "url": "https://github.com/jasonuithol/DayzPortals",
+      "description": "DayZ mod: craftable Soviet transit gates (Valheim-style portals) linked by radio frequency",
+      "topics": [],
+      "languages": {
+        "C": 42539,
+        "C++": 2986
+      },
+      "firstCommit": "2026-10-29T02:37:03Z",
+      "lastCommit": "2026-10-29T05:47:24Z",
+      "commits": 6,
+      "activeMonths": [
+        "2026-10"
       ]
     },
     {
@@ -589,17 +644,18 @@
       "description": "An immutable-first language that compiles to C# and C++: inferred effects, event folds, compile-time composition roots",
       "topics": [],
       "languages": {
-        "C#": 653991,
+        "C#": 657597,
         "C++": 66769,
-        "HTML": 44186,
+        "HTML": 44493,
         "Shell": 858
       },
       "firstCommit": "2026-09-08T09:50:49Z",
-      "lastCommit": "2026-10-22T12:50:01Z",
-      "commits": 57,
+      "lastCommit": "2026-11-03T13:02:16Z",
+      "commits": 60,
       "activeMonths": [
         "2026-09",
-        "2026-10"
+        "2026-10",
+        "2026-11"
       ]
     },
     {
